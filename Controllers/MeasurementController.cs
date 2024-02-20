@@ -28,26 +28,38 @@ namespace eMeterApi.Controllers
         }
 
 
+        /// <summary>
+        /// Store a digital measure
+        /// </summary>
+        /// <param name="payload"> Digital measure serialized; required; 98 length </param>
+        /// <returns></returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">If the payload is not valid </response>
         [HttpPost]
-        public IActionResult PostData( string request) {
+        public IActionResult PostData( string payload) {
 
             //Validate requestBody
-            if (string.IsNullOrEmpty(request) || request.Length != 98)
+            if (string.IsNullOrEmpty( payload) || payload.Length != 98)
             {
-                return BadRequest( request );
+                return BadRequest( payload );
             }
 
             // Process the data
-            var meterData = ProcessBuffer.ProcessData(request);
+            var meterData = ProcessBuffer.ProcessData( payload );
 
             // Store in database
             var conectionString = this.configuration.GetConnectionString("eMeter");
             dbRepository.InsertData( meterData );
             
             // Return digest model
-            return Ok( meterData );
+            return StatusCode( 201, meterData);
         }
         
+        /// <summary>
+        /// Retrive all stored measures
+        /// </summary>
+        /// <returns> List of  stored measures </returns>
+        /// <response code="200">Returns the data</response>
         [HttpGet]
         public ActionResult<IEnumerable<MeterData>> GetData()
         {
