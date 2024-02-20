@@ -14,9 +14,11 @@ namespace eMeterApi.Controllers
     {
 
         private readonly IConfiguration configuration;
+        private readonly EMeterRepository dbRepository;
 
-        public MeasurementController( IConfiguration c){
+        public MeasurementController( IConfiguration c, EMeterRepository repository){
             this.configuration = c;
+            this.dbRepository = repository;
         }
 
         [HttpGet]
@@ -32,20 +34,26 @@ namespace eMeterApi.Controllers
             //Validate requestBody
             if (string.IsNullOrEmpty(request) || request.Length != 98)
             {
-                // Return a 400 Bad Request response if validation fails
                 return BadRequest( request );
             }
 
             // Process the data
             var meterData = ProcessBuffer.ProcessData(request);
 
-            // TODO: Store in SQL
+            // Store in database
             var conectionString = this.configuration.GetConnectionString("eMeter");
-            var dbRepository = new Repository(conectionString);
             dbRepository.InsertData( meterData );
             
+            // Return digest model
             return Ok( meterData );
         }
         
+        [HttpGet]
+        public ActionResult<IEnumerable<MeterData>> GetData()
+        {
+            var data = dbRepository.GetAll().ToList();
+            return data;
+        }
+
     }
 }

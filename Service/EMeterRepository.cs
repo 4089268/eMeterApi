@@ -5,19 +5,18 @@ using eMeterApi;
 
 namespace eMeterApi.Service
 {
-    public class Repository
+    public class EMeterRepository
     {
 
         private readonly string connectionString;
 
-        public Repository(string connectionString)
+        public EMeterRepository(string connectionString)
         {
             this.connectionString = connectionString;
         }
 
         public void InsertData( MeterData meterData)
         {
-
             // Create INSERT command with parameters
             string insertQuery = @"
                 INSERT INTO MeterDataTable (StartCode, MeterType, MeterAddress, ControlCode, DataLength, DataId, Ser, CfUnit, 
@@ -69,9 +68,73 @@ namespace eMeterApi.Service
                     // Open the connection and execute the command
                     connection.Open();
                     command.ExecuteNonQuery();
+                    connection.Close();
                 }
             }
         }
         
+        public IEnumerable<MeterData> GetAll()
+        {    
+            var dataList = new List<MeterData>();
+
+            string selectQuery = "SELECT * FROM MeterDataTable";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                // Open the connection
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand(selectQuery, connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        // Read the data and create MeterData objects
+                        while (reader.Read())
+                        {
+                            MeterData data = new MeterData
+                            {
+                                StartCode = reader["StartCode"].ToString() ?? "",
+                                MeterType = reader["MeterType"].ToString() ?? "",
+                                MeterAddress = reader["MeterAddress"].ToString() ?? "",
+                                ControlCode = reader["ControlCode"].ToString() ?? "", 
+                                DataLenght = Convert.ToInt32(reader["DataLength"]),
+                                DataId = reader["DataId"].ToString() ?? "",
+                                Ser = reader["Ser"].ToString() ?? "",
+                                CfUnit = reader["CfUnit"].ToString() ?? "",
+                                CummulativeFlow = Convert.ToDouble(reader["CummulativeFlow"]),
+                                CfUnitSetDay = reader["CfUnitSetDay"].ToString() ?? "",
+                                DayliCumulativeAmount = Convert.ToDouble(reader["DayliCumulativeAmount"]),
+                                ReverseCfUnit = reader["ReverseCfUnit"].ToString() ?? "",
+                                ReverseCumulativeFlow = Convert.ToDouble(reader["ReverseCumulativeFlow"]),
+                                FlowRateUnit = reader["FlowRateUnit"].ToString() ?? "",
+                                FlowRate = Convert.ToDouble(reader["FlowRate"]),
+                                Temperature = Convert.ToDouble(reader["Temperature"]),
+                                DevDate = reader["DevDate"].ToString() ?? "",
+                                DevTime = reader["DevTime"].ToString() ?? "",
+                                Status = reader["Status"].ToString() ?? "",
+                                Valve = reader["Valve"].ToString() ?? "",
+                                Battery = reader["Battery"].ToString() ?? "",
+                                Battery1 = reader["Battery1"].ToString() ?? "",
+                                Empty = reader["Empty"].ToString() ?? "",
+                                ReverseFlow = reader["ReverseFlow"].ToString() ?? "",
+                                OverRange = reader["OverRange"].ToString() ?? "",
+                                WaterTemp = reader["WaterTemp"].ToString() ?? "",
+                                EEAlarm = reader["EEAlarm"].ToString() ?? "",
+                                Reserved = reader["Reserved"].ToString() ?? "",
+                                CheckSume = reader["CheckSum"].ToString() ?? "",
+                                EndMark = reader["EndMark"].ToString() ?? ""
+                            };
+
+                            // Add the MeterData object to the list
+                            dataList.Add(data);
+                        }
+                    }
+                }
+                connection.Close();
+            }
+
+            return dataList;
+        }
+
     }
 }

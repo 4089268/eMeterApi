@@ -1,7 +1,13 @@
+using eMeterApi.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
+
+var _connectionString = builder.Configuration.GetConnectionString("eMeter");
+
+// Add services to the container.
+builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_connectionString));
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
