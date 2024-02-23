@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using eMeterApi.Models;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,6 +56,28 @@ namespace eMeterApi.Controllers
             return StatusCode( 201, meterData);
         }
         
+        [HttpPost]
+        [Route("/res/callback/payloads/ul")]
+        public IActionResult PostData( PayloadRequest payloadRequest ) {
+
+            //Validate requestBody
+            if (string.IsNullOrEmpty( payloadRequest.Payload) || payloadRequest.Payload.Length != 98)
+            {
+                return BadRequest( payloadRequest.Payload );
+            }
+
+            // Process the data
+            var meterData = ProcessBuffer.ProcessData( payloadRequest.Payload );
+
+            // Store in database
+            var conectionString = this.configuration.GetConnectionString("eMeter");
+            dbRepository.InsertData( meterData );
+            
+            // Return digest model
+            return StatusCode( 201, meterData);
+        }
+        
+
         /// <summary>
         /// Retrive all stored measures
         /// </summary>
