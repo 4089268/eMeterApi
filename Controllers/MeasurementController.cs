@@ -56,8 +56,15 @@ namespace eMeterApi.Controllers
             return StatusCode( 201, meterData);
         }
         
+        /// <summary>
+        /// Store a digital measure 
+        /// </summary>
+        /// <param name="PayloadRequest"> Payload request that hold the digital measure serialized; required; 98 length </param>
+        /// <returns></returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">If the payload is not valid </response>
         [HttpPost]
-        [Route("/res/callback/payloads/ul")]
+        [Route("/rest/callback/payloads/ul")]
         public IActionResult PostData( PayloadRequest payloadRequest ) {
 
             //Validate requestBody
