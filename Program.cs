@@ -1,9 +1,9 @@
 using eMeterApi.Service;
+using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 var _connectionString = builder.Configuration.GetConnectionString("eMeter");
 
@@ -26,6 +26,19 @@ builder.Services.AddSwaggerGen( options =>
     })
 );
 
+// Configure logger
+builder.Host.ConfigureLogging( logging => {
+    logging.ClearProviders();
+    logging.AddConsole();
+    builder.Logging.AddEventLog( eventLogSettings => {
+        eventLogSettings.LogName = "Nerus";
+        eventLogSettings.SourceName = "eMeter";
+    });
+});
+
+builder.Services.AddHttpLogging(configureOptions => { 
+    configureOptions.LoggingFields = HttpLoggingFields.All;
+});
 
 var app = builder.Build();
 
@@ -36,10 +49,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpLogging();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
+app.Logger.LogWarning("Starting the app");
 app.Run();
