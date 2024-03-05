@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using eMeterApi.Models;
+using eMeterApi.Entities;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +14,12 @@ namespace eMeterApi.Controllers
     public class MeasurementController : ControllerBase
     {
 
+        private readonly ILogger<MeasurementController> logger;
         private readonly IConfiguration configuration;
         private readonly EMeterRepository dbRepository;
 
-        public MeasurementController( IConfiguration c, EMeterRepository repository){
+        public MeasurementController( ILogger<MeasurementController> logger, IConfiguration c, EMeterRepository repository){
+            this.logger = logger;
             this.configuration = c;
             this.dbRepository = repository;
         }
@@ -30,33 +32,6 @@ namespace eMeterApi.Controllers
 
 
         /// <summary>
-        /// Store a digital measure
-        /// </summary>
-        /// <param name="payload"> Digital measure serialized; required; 98 length </param>
-        /// <returns></returns>
-        /// <response code="201">Returns the newly created item</response>
-        /// <response code="400">If the payload is not valid </response>
-        [HttpPost]
-        public IActionResult PostData( string payload) {
-
-            //Validate requestBody
-            if (string.IsNullOrEmpty( payload) || payload.Length != 98)
-            {
-                return BadRequest( payload );
-            }
-
-            // Process the data
-            var meterData = ProcessBuffer.ProcessData( payload );
-
-            // Store in database
-            var conectionString = this.configuration.GetConnectionString("eMeter");
-            dbRepository.InsertData( meterData );
-            
-            // Return digest model
-            return StatusCode( 201, meterData);
-        }
-        
-        /// <summary>
         /// Store a digital measure 
         /// </summary>
         /// <param name="PayloadRequest"> Payload request that hold the digital measure serialized; required; 98 length </param>
@@ -65,19 +40,19 @@ namespace eMeterApi.Controllers
         /// <response code="400">If the payload is not valid </response>
         [HttpPost]
         [Route("/rest/callback/payloads/ul")]
-        public IActionResult PostData( PayloadRequest payloadRequest ) {
+        public IActionResult PostData( DeviceNotification payloadRequest ) {
 
             //Validate requestBody
-            if (string.IsNullOrEmpty( payloadRequest.Payload) || payloadRequest.Payload.Length != 98)
+            if (string.IsNullOrEmpty( payloadRequest.DataFrame ) || payloadRequest.DataFrame.Length != 98)
             {
-                return BadRequest( payloadRequest.Payload );
+                this.logger.LogWarning( "BadRequest at PostData; request={request}", payloadRequest );
+                return BadRequest( payloadRequest.DataFrame );
             }
 
             // Process the data
-            var meterData = ProcessBuffer.ProcessData( payloadRequest.Payload );
+            var meterData = ProcessBuffer.ProcessData( payloadRequest.DataFrame );
 
             // Store in database
-            var conectionString = this.configuration.GetConnectionString("eMeter");
             dbRepository.InsertData( meterData );
             
             // Return digest model
