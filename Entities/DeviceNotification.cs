@@ -81,17 +81,12 @@ namespace eMeterApi.Entities
 
     public class Decoded
     {
-        [JsonPropertyName("port")]
-        public int? Port { get; set; }
+        [JsonPropertyName("username")]
+        public string? UserName { get; set; }
 
-        [JsonPropertyName("msgID")]
-        public int? MsgID { get; set; }
-
-        [JsonPropertyName("msgIdDesc")]
-        public string? MsgIdDesc { get; set; }
-
-        [JsonPropertyName("length")]
-        public int? Length { get; set; }
+        [JsonPropertyName("group_id")]
+        public string? GroupId { get; set; }
+        
     }
         
 }

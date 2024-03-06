@@ -15,18 +15,18 @@ namespace eMeterApi.Service
             this.connectionString = connectionString;
         }
 
-        public void InsertData( MeterData meterData)
+        public void InsertData(MeterData meterData, string? groupId)
         {
             // Create INSERT command with parameters
             string insertQuery = @"
                 INSERT INTO MeterDataTable (StartCode, MeterType, MeterAddress, ControlCode, DataLength, DataId, Ser, CfUnit, 
                 CummulativeFlow, CfUnitSetDay, DayliCumulativeAmount, ReverseCfUnit, ReverseCumulativeFlow, FlowRateUnit, FlowRate, 
                 Temperature, DevDate, DevTime, Status, Valve, Battery, Battery1, Empty, ReverseFlow, OverRange, WaterTemp, 
-                EEAlarm, Reserved, CheckSum, EndMark, RegistrationDate) 
+                EEAlarm, Reserved, CheckSum, EndMark, RegistrationDate, GroupId) 
                 VALUES (@StartCode, @MeterType, @MeterAddress, @ControlCode, @DataLength, @DataId, @Ser, @CfUnit, @CummulativeFlow, 
                 @CfUnitSetDay, @DayliCumulativeAmount, @ReverseCfUnit, @ReverseCumulativeFlow, @FlowRateUnit, @FlowRate, 
                 @Temperature, @DevDate, @DevTime, @Status, @Valve, @Battery, @Battery1, @Empty, @ReverseFlow, @OverRange, 
-                @WaterTemp, @EEAlarm, @Reserved, @CheckSum, @EndMark, @RegistrationDate)";
+                @WaterTemp, @EEAlarm, @Reserved, @CheckSum, @EndMark, @RegistrationDate, @GroupId)";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -64,6 +64,7 @@ namespace eMeterApi.Service
                     command.Parameters.AddWithValue("@CheckSum", meterData.CheckSume);
                     command.Parameters.AddWithValue("@EndMark",meterData. EndMark);
                     command.Parameters.AddWithValue("@RegistrationDate", DateTime.Now); // Set the current date and time
+                    command.Parameters.AddWithValue("@GroupId", groupId); 
 
                     // Open the connection and execute the command
                     connection.Open();

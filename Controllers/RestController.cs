@@ -51,7 +51,8 @@ namespace eMeterApi.Controllers
             var meterData = ProcessBuffer.ProcessData( payloadRequest.DataFrame );
 
             // Store in database
-            dbRepository.InsertData( meterData );
+            string? groupId = payloadRequest.Decoded == null ?null :payloadRequest.Decoded.GroupId;
+            dbRepository.InsertData( meterData, groupId );
             
             // Return digest model
             return StatusCode( 201, meterData);
