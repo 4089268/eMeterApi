@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Text;
 using eMeterApi;
 
@@ -9,61 +10,77 @@ namespace eMeterApi.Service
     {
         public static MeterData ProcessData( string stringBuffer )
         {
-            byte[] buffer = Convert.FromHexString( stringBuffer );
 
-            string start_code = BitConverter.ToString(buffer, 0, 1).Replace("-", "");
-            string meter_type = BitConverter.ToString(buffer, 1, 1).Replace("-", "");
+            string[] buffer = SplitString( stringBuffer );
+
+            string start_code = buffer[0];
+
+            string meter_type = buffer[1];
+
+            string meter_addr = buffer[8] +
+                                buffer[7] +
+                                buffer[6] +
+                                buffer[5] +
+                                buffer[4] +
+                                buffer[3] +
+                                buffer[2];
             
+            string control_code = buffer[9];
+
+            int data_length = Convert.ToInt32( buffer[10], 16 );
+
+            string data_id = buffer[11] + buffer[12];
+
+            string serial = buffer[13];
+
+            string cf_unit = buffer[14];
+
+            double cumulative_flow = Convert.ToDouble( buffer[18] + buffer[17] + buffer[16] + buffer[15] ) / 100;
+
+            string cf_unit_set_day = buffer[19];
+
+            double daily_cumulative_amount = Convert.ToDouble( buffer[23] + buffer[22] + buffer[21] + buffer[20]) / 100;
+
+            string reverse_cf_unit = buffer[24];
+
+            double reverse_cumulative_flow = Convert.ToDouble( buffer[28] + buffer[27] + buffer[26] + buffer[25] ) / 100;
             
-            string meter_addr = BitConverter.ToString(buffer, 8, 1).Replace("-", "") +
-                                BitConverter.ToString(buffer, 6, 2).Replace("-", "") +
-                                BitConverter.ToString(buffer, 2, 4).Replace("-", "");
+            string flow_rate_unit = buffer[29];
 
-            // string meter_addr = BitConverter.ToString(buffer, 8, 1).Replace("-", "") +
-            //                     BitConverter.ToString(buffer, 6, 2).SwapBytes(0, 2).Replace("-", "") +
-            //                     BitConverter.ToString(buffer, 2, 4).SwapBytes(0, 3).Replace("-", "");
+            double flow_rate = Convert.ToDouble( buffer[33] + buffer[32] + buffer[31] + buffer[30] ) / 100;
 
-
-            string control_code = BitConverter.ToString(buffer, 9, 1).Replace("-", "");
-            int data_length = buffer[10];
-            string data_id = BitConverter.ToString(buffer, 11, 2).Replace("-", "");
-            string serial = BitConverter.ToString(buffer, 13, 1).Replace("-", "");
-            string cf_unit = BitConverter.ToString(buffer, 14, 1).Replace("-", "");
-            double cumulative_flow = BitConverter.ToInt32(buffer, 15).SwapEndian() / 100.0;
-            string cf_unit_set_day = BitConverter.ToString(buffer, 19, 1).Replace("-", "");
-            double daily_cumulative_amount = BitConverter.ToInt32(buffer, 20).SwapEndian() / 100.0;
-            string reverse_cf_unit = BitConverter.ToString(buffer, 24, 1).Replace("-", "");
-            double reverse_cumulative_flow = BitConverter.ToInt32(buffer, 25).SwapEndian() / 100.0;
-            string flow_rate_unit = BitConverter.ToString(buffer, 29, 1).Replace("-", "");
-            double flow_rate = BitConverter.ToInt32(buffer, 30).SwapEndian() / 100.0;
-            double temperature = Convert.ToInt32(BitConverter.ToString(buffer, 35, 1) +
-                                                BitConverter.ToString(buffer, 34, 1), 16) / 100.0;
+            double temperature = Convert.ToDouble( buffer[35] + buffer[34] ) / 100;
             
-            string dev_date = BitConverter.ToString(buffer, 40, 1) + "-" +
-                            BitConverter.ToString(buffer, 41, 1) + "-" +
-                            BitConverter.ToString(buffer, 42, 2).Replace("-", "");
-            // string dev_date = BitConverter.ToString(buffer, 40, 1) + "-" +
-            //                   BitConverter.ToString(buffer, 41, 1) + "-" +
-            //                   BitConverter.ToString(buffer, 42, 2).SwapBytes(0, 1).Replace("-", "");
+            string dev_date = $"{buffer[40]}-{buffer[41]}-{buffer[43]}{buffer[42]}";
+            
+            string time = $"{buffer[39]}:{buffer[38]}:{buffer[37]}";
 
 
-            string time = BitConverter.ToString(buffer, 39, 1) + ":" +
-                        BitConverter.ToString(buffer, 38, 1) + ":" +
-                        BitConverter.ToString(buffer, 37, 1);
-            string alarm = Convert.ToString(BitConverter.ToInt16(buffer, 44), 2).PadLeft(16, '0');
+            var _preAlarm =  Convert.ToInt32( buffer[44] + buffer[45], 16);
+            string alarm = Convert.ToString( _preAlarm, 2).PadLeft(16, '0');
+
             string apertura = alarm.Substring(6, 2) == "00" ? "open" :
                             alarm.Substring(6, 2) == "01" ? "closed" :
                             alarm.Substring(6, 2) == "11" ? "anormal" : "otro";
             string bateria = alarm[5] == '0' ? "normal" : "low battery";
+
             string bateria_1 = alarm[15] == '0' ? "normal" : "alarma";
+
             string empty = alarm[14] == '0' ? "normal" : "alarma";
+
             string reverse_flow = alarm[13] == '0' ? "normal" : "alarma";
+
             string over_range = alarm[12] == '0' ? "normal" : "alarma";
+
             string water_temp = alarm[11] == '0' ? "normal" : "alarma";
+
             string ee_alarm = alarm[10] == '0' ? "normal" : "alarma";
-            string reserved = BitConverter.ToString(buffer, 46, 1).Replace("-", "");
-            string check_sume = BitConverter.ToString(buffer, 47, 1).Replace("-", "");
-            string end_mark = BitConverter.ToString(buffer, 48, 1).Replace("-", "");
+            
+            string reserved = buffer[46];
+
+            string check_sume = buffer[47];
+
+            string end_mark = buffer[48];
 
             var _dataModel = new MeterData();
             _dataModel.StartCode = start_code;
@@ -99,31 +116,20 @@ namespace eMeterApi.Service
 
             return _dataModel;
         }
-    }
 
-    public static class ExtensionMethods
-    {
-        public static int SwapEndian(this int value)
+        private static string[] SplitString( string input)
         {
-            return BitConverter.ToInt32(BitConverter.GetBytes(value).SwapBytes(0, 3), 0);
-        }
-
-        public static byte[] SwapBytes(this byte[] value, int index1, int index2)
-        {
-            byte temp = value[index1];
-            value[index1] = value[index2];
-            value[index2] = temp;
-            return value;
-        }
-
-        public static byte[] ConvertFromHexString(this string hexString)
-        {
-            byte[] buffer = new byte[hexString.Length / 2];
-            for (int i = 0; i < hexString.Length; i += 2)
+            int chunkSize = 2;
+            var chunks = new List<string>();
+            for( int i = 0; i < input.Length; i+= chunkSize )
             {
-                buffer[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+                if( i + chunkSize <= input.Length)
+                {
+                    string chunk = input.Substring(i, chunkSize);
+                    chunks.Add( chunk );    
+                }
             }
-            return buffer;
+            return chunks.ToArray();
         }
     }
 

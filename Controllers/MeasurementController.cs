@@ -59,6 +59,32 @@ namespace eMeterApi.Controllers
             return StatusCode( 201, meterData);
         }
         
+        /// <summary>
+        /// Store a digital measure 
+        /// </summary>
+        /// <param name="PayloadRequest"> Payload request that hold the digital measure serialized; required; 98 length </param>
+        /// <returns></returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">If the payload is not valid </response>
+        [HttpGet]
+        [Route("/rest/callback/payloads/test")]
+        public IActionResult TestPayload( string dataFrame ) {
+            
+            
+            //Validate requestBody
+            if (string.IsNullOrEmpty( dataFrame ) || dataFrame.Length != 98)
+            {
+                this.logger.LogWarning( "BadRequest at PostData; request={request}", dataFrame );
+                return BadRequest( dataFrame );
+            }
+
+            // Process the data
+            var meterData = ProcessBuffer.ProcessData( dataFrame );
+
+            // Return digest model
+            return Ok( meterData );
+        }
+        
 
         /// <summary>
         /// Retrive all stored measures
