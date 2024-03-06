@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Logging.EventLog;
@@ -30,10 +31,13 @@ builder.Services.AddSwaggerGen( options =>
 builder.Host.ConfigureLogging( logging => {
     logging.ClearProviders();
     logging.AddConsole();
-    builder.Logging.AddEventLog( eventLogSettings => {
-        eventLogSettings.LogName = "Nerus";
-        eventLogSettings.SourceName = "eMeter";
-    });
+    
+    if( RuntimeInformation.IsOSPlatform( OSPlatform.Windows) ){
+        builder.Logging.AddEventLog( eventLogSettings => {
+            eventLogSettings.LogName = "Nerus";
+            eventLogSettings.SourceName = "eMeter";
+        });
+    }
 });
 
 builder.Services.AddHttpLogging(configureOptions => { 
