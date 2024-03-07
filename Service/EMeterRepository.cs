@@ -64,7 +64,7 @@ namespace eMeterApi.Service
                     command.Parameters.AddWithValue("@CheckSum", meterData.CheckSume);
                     command.Parameters.AddWithValue("@EndMark",meterData. EndMark);
                     command.Parameters.AddWithValue("@RegistrationDate", DateTime.Now); // Set the current date and time
-                    command.Parameters.AddWithValue("@GroupId", groupId); 
+                    command.Parameters.AddWithValue("@GroupId", groupId??""); 
 
                     // Open the connection and execute the command
                     connection.Open();
