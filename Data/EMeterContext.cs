@@ -80,6 +80,9 @@ public partial class EMeterContext : DbContext
                 .HasMaxLength(80)
                 .IsUnicode(false)
                 .HasColumnName("proyecto");
+            entity.Property( e => e.DeletedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("deleted_at");
         });
 
         modelBuilder.Entity<SysProyectoUsuario>(entity =>
