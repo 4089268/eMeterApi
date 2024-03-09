@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace eMeterApi.Entities
+namespace eMeterApi.Models
 {
     public class DeviceNotification
     {

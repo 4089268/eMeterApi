@@ -6,7 +6,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var _connectionString = builder.Configuration.GetConnectionString("eMeter");
+var _connectionString = builder.Configuration.GetConnectionString("eMeter")!;
 
 // Add services to the container.
 builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_connectionString));

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using eMeterApi.Entities;
+using eMeterApi.Models;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.Mvc;
 
