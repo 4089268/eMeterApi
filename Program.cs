@@ -1,6 +1,8 @@
 using System.Runtime.InteropServices;
+using eMeterApi.Data;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.OpenApi.Models;
 
@@ -10,8 +12,12 @@ var _connectionString = builder.Configuration.GetConnectionString("eMeter")!;
 
 // Add services to the container.
 builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_connectionString));
+builder.Services.AddDbContext<EMeterContext>( o => {
+    o.UseSqlServer( builder.Configuration.GetConnectionString(_connectionString) );
+});
+builder.Services.AddScoped<IProjectService, ProjectService>();
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen( options => 
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -26,6 +32,8 @@ builder.Services.AddSwaggerGen( options =>
         }
     })
 );
+
+
 
 // Configure logger
 builder.Host.ConfigureLogging( logging => {
@@ -47,11 +55,8 @@ builder.Services.AddHttpLogging(configureOptions => {
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI( o => o.SwaggerEndpoint("/swagger/v1/swagger.json", "eMeter API V1") );
 
 app.UseHttpLogging();
 app.UseHttpsRedirection();
