@@ -35,20 +35,39 @@ namespace eMeterApi.Controllers
         /// <returns> List of  stored measures </returns>
         /// <response code="200">Returns the data</response>
         [HttpGet]
-        public IActionResult GetMeasurement( [FromQuery] int chunk = 25, [FromQuery] int page = 0, [FromQuery] string? deviceAddress = "" )
+        public IActionResult GetMeasurement( [FromQuery] int chunk = 25, [FromQuery] int page = 0, [FromQuery] string? deviceAddress = "", [FromQuery] string? from = "", [FromQuery] string? to = "" )
         {
             
-            var query = eMeterContext.MeterDataTables.OrderByDescending( e => e.RegistrationDate);
-            if(deviceAddress != null ){
-                query.Where( item => item.MeterAddress == deviceAddress);
+            var query = eMeterContext.MeterDataTables.OrderByDescending( e => e.RegistrationDate).AsQueryable();
+            if( !string.IsNullOrEmpty(deviceAddress) ){
+                query = query.Where( item => item.MeterAddress == deviceAddress);
             }
+
+            if( !string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to) ){
+                if(DateTime.TryParse(from, out var _from) && DateTime.TryParse(to, out var _to)){
+                    query = query.Where(item => _from.Date <= item.RegistrationDate!.Value.Date && item.RegistrationDate!.Value.Date <= _to.Date);
+
+                }
+                else {
+                    return BadRequest( new {
+                        title = "Dates are not valid",
+                        message = "Invalid date format or values provided for 'from' and 'to'."
+                    });
+                }
+            }
+
 
             var totalItems = query.Count();
 
-            var data = query
-                .Skip( chunk * page)
-                .Take( chunk)
-                .ToImmutableList();
+            IEnumerable<MeterDataTable> data = Array.Empty<MeterDataTable>();
+            if( chunk == 0){
+                data = query.ToList();
+            }else{
+                data = query
+                    .Skip( chunk * page)
+                    .Take( chunk)
+                    .ToList();
+            }
 
             return Ok( new EnumerableResponse<MeterDataTable>(){
                 Data = data,
