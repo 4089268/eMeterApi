@@ -1,9 +1,12 @@
 using System.Runtime.InteropServices;
+using System.Text;
 using eMeterApi.Data;
 using eMeterApi.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.EventLog;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,14 +14,30 @@ var builder = WebApplication.CreateBuilder(args);
 var _connectionString = builder.Configuration.GetConnectionString("eMeter")!;
 
 // Add services to the container.
+builder.Services.AddAuthentication( o => {
+    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer( x => {
+    x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters{
+        IssuerSigningKey = new SymmetricSecurityKey( Encoding.UTF8.GetBytes( builder.Configuration.GetValue<string>("JwtSettings:Key")!)),
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
+    };
+});
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_connectionString));
 builder.Services.AddDbContext<EMeterContext>( o => {
     o.UseSqlServer( builder.Configuration.GetConnectionString(_connectionString) );
 });
 builder.Services.AddScoped<IProjectService, ProjectService>();
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
 builder.Services.AddSwaggerGen( options => 
     options.SwaggerDoc("v1", new OpenApiInfo
     {
@@ -32,8 +51,6 @@ builder.Services.AddSwaggerGen( options =>
         }
     })
 );
-
-
 
 // Configure logger
 builder.Host.ConfigureLogging( logging => {
@@ -60,6 +77,7 @@ app.UseSwaggerUI( o => o.SwaggerEndpoint("/swagger/v1/swagger.json", "eMeter API
 
 app.UseHttpLogging();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Logger.LogWarning("Starting the app");
