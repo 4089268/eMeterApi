@@ -13,19 +13,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 var _connectionString = builder.Configuration.GetConnectionString("eMeter")!;
 
+Console.WriteLine("(-)  Issuer" + builder.Configuration.GetValue<string>("JwtSettings:Issuer") );
+
 // Add services to the container.
 builder.Services.AddAuthentication( o => {
     o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer( x => {
-    x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters{
-        IssuerSigningKey = new SymmetricSecurityKey( Encoding.UTF8.GetBytes( builder.Configuration.GetValue<string>("JwtSettings:Key")!)),
+    x.TokenValidationParameters = new TokenValidationParameters{
+        ValidIssuer = builder.Configuration.GetValue<string>("JwtSettings:Issuer"),
+        ValidAudience = builder.Configuration.GetValue<string>("JwtSettings:Audience"),
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes( builder.Configuration.GetValue<string>("JwtSettings:Key") )
+        ),
+        ValidateIssuer = true,
+        ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true
     };
 });
-
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_connectionString));

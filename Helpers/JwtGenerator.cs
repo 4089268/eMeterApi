@@ -33,7 +33,10 @@ namespace eMeterApi.Helpers
                 Expires = DateTime.UtcNow.Add( TokenLifeTime),
                 Issuer = "https://emeter.arquos.ddns.net",
                 Audience = "https://emeter.arquos.ddns.net",
-                SigningCredentials = new SigningCredentials( new SymmetricSecurityKey( TokenKey), SecurityAlgorithms.HmacSha256)
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey( TokenKey),
+                    SecurityAlgorithms.HmacSha256
+                )
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
