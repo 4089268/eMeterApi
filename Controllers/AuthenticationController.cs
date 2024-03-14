@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using eMeterApi.Data;
 using eMeterApi.Helpers;
+using eMeterApi.Models.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
@@ -24,11 +25,17 @@ namespace eMeterApi.Controllers
 
         [HttpPost]
         [Route("/")]
-        public IActionResult Authenticated( [FromBody] string user, [FromBody] string password )
+        public IActionResult Authenticated( [FromBody] AuthenticationRequest authenticationRequest )
         {
+            if(!ModelState.IsValid){
+                return BadRequest(ModelState);
+            }
+
             var jwtGenerator = new JwtGenerator( jwtSettings.Value.Key );
 
-            var token = jwtGenerator.Generate(user, "user", "1");
+            // TODO: Validate credentials on database
+
+            var token = jwtGenerator.Generate( authenticationRequest.Email!, "Juan Salvador", "1");
 
             return Ok( new {
                 title = "Token generated",

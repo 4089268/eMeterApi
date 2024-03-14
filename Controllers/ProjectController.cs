@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using eMeterApi.Data;
 using eMeterApi.Data.Exceptions;
 using eMeterApi.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eMeterApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ProjectController : ControllerBase
