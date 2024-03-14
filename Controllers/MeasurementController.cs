@@ -9,12 +9,12 @@ using eMeterApi.Data;
 using eMeterApi.Entities;
 using eMeterApi.Models;
 using eMeterApi.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace eMeterApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MeasurementController : ControllerBase
