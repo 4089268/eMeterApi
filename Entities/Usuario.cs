@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using eMeterApi.Data.Contracts.Models;
 
 namespace eMeterApi.Entities;
 
-public partial class Usuario
+public partial class Usuario : IUser
 {
     public long Id { get; set; }
 
@@ -22,4 +23,9 @@ public partial class Usuario
     public DateTime? DeletedAt { get; set; }
 
     public virtual ICollection<SysProyectoUsuario> SysProyectoUsuarios { get; } = new List<SysProyectoUsuario>();
+
+
+    public string Email { get => this.Usuario1??""; set => this.Usuario1 = value; }
+    public string Name { get => this.Operador??""; set => this.Operador = value; }
+    public string? Company { get => this.Empresa; set =>  this.Empresa = value ; }
 }
