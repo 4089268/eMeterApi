@@ -1,7 +1,9 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using eMeterApi.Data;
+using eMeterApi.Data.Contracts;
 using eMeterApi.Service;
+using eMeterAPi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +39,7 @@ builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_c
 builder.Services.AddDbContext<EMeterContext>( o => {
     o.UseSqlServer( builder.Configuration.GetConnectionString(_connectionString) );
 });
-builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectsService, ProjectsService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

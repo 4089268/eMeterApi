@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using eMeterApi.Data.Contracts.Models;
 
 namespace eMeterApi.Entities;
@@ -24,8 +25,10 @@ public partial class Usuario : IUser
 
     public virtual ICollection<SysProyectoUsuario> SysProyectoUsuarios { get; } = new List<SysProyectoUsuario>();
 
-
+    [NotMapped]
     public string Email { get => this.Usuario1??""; set => this.Usuario1 = value; }
+    [NotMapped]
     public string Name { get => this.Operador??""; set => this.Operador = value; }
+    [NotMapped]
     public string? Company { get => this.Empresa; set =>  this.Empresa = value ; }
 }
