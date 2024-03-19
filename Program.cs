@@ -13,8 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 var _connectionString = builder.Configuration.GetConnectionString("eMeter")!;
 
-Console.WriteLine("(-)  Issuer" + builder.Configuration.GetValue<string>("JwtSettings:Issuer") );
-
 // Add services to the container.
 builder.Services.AddAuthentication( o => {
     o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

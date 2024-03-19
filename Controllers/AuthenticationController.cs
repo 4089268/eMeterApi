@@ -16,30 +16,29 @@ namespace eMeterApi.Controllers
     public class AuthenticationController : ControllerBase
     {
 
-        private readonly IOptions<JwtSettings> jwtSettings;
+        private readonly JwtSettings jwtSettings;
 
-        public AuthenticationController( IOptions<JwtSettings> jwtSettings ){
-            this.jwtSettings = jwtSettings;
+        public AuthenticationController( IOptions<JwtSettings> optionsJwtSettings ){
+            this.jwtSettings = optionsJwtSettings.Value;
         } 
 
 
         [HttpPost]
-        [Route("/")]
         public IActionResult Authenticated( [FromBody] AuthenticationRequest authenticationRequest )
         {
             if(!ModelState.IsValid){
                 return BadRequest(ModelState);
             }
 
-            var jwtGenerator = new JwtGenerator( jwtSettings.Value.Key );
+            var jwtGenerator = new JwtGenerator( jwtSettings );
 
             // TODO: Validate credentials on database
 
-            var token = jwtGenerator.Generate( authenticationRequest.Email!, "Juan Salvador", "1");
+            var token = jwtGenerator.Generate( "1",  authenticationRequest.Email!, "Juan Salvador", null);
 
             return Ok( new {
                 title = "Token generated",
-                token = token
+                token
             });
         }
     }
