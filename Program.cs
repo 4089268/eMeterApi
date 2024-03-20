@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using eMeterApi.Data;
+using eMeterApi.Data.Contracts;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
@@ -12,8 +13,6 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 var _connectionString = builder.Configuration.GetConnectionString("eMeter")!;
-
-Console.WriteLine("(-)  Issuer" + builder.Configuration.GetValue<string>("JwtSettings:Issuer") );
 
 // Add services to the container.
 builder.Services.AddAuthentication( o => {
@@ -40,6 +39,7 @@ builder.Services.AddDbContext<EMeterContext>( o => {
     o.UseSqlServer( builder.Configuration.GetConnectionString(_connectionString) );
 });
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -87,5 +87,4 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.Logger.LogWarning("Starting the app");
 app.Run();

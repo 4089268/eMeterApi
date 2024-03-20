@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using eMeterApi.Data;
+using eMeterApi.Data.Contracts;
 using eMeterApi.Helpers;
 using eMeterApi.Models.ViewModel;
+using eMeterApi.Service;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.Identity.Client;
 
 namespace eMeterApi.Controllers
 {
@@ -16,26 +16,35 @@ namespace eMeterApi.Controllers
     public class AuthenticationController : ControllerBase
     {
 
-        private readonly IOptions<JwtSettings> jwtSettings;
+        private readonly IUserService userService;
 
-        public AuthenticationController( IOptions<JwtSettings> jwtSettings ){
-            this.jwtSettings = jwtSettings;
+        public AuthenticationController( IUserService userService){
+            this.userService = userService;
         } 
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authenticationRequest"></param>
+        /// <returns></returns>
+        /// <response code="200">Authentication valida</response>
+        /// <response code="401">Credentials invalid</response>
         [HttpPost]
-        [Route("/")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
         public IActionResult Authenticated( [FromBody] AuthenticationRequest authenticationRequest )
         {
             if(!ModelState.IsValid){
                 return BadRequest(ModelState);
             }
 
-            var jwtGenerator = new JwtGenerator( jwtSettings.Value.Key );
-
-            // TODO: Validate credentials on database
-
-            var token = jwtGenerator.Generate( authenticationRequest.Email!, "Juan Salvador", "1");
+            var token = userService.Authenticate( authenticationRequest, out string? message );
+            if( token == null){
+                return Unauthorized( new {
+                    message = message
+                });
+            }
 
             return Ok( new {
                 title = "Token generated",
