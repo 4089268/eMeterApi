@@ -48,7 +48,7 @@ namespace eMeterApi.Controllers
 
             return Ok( new {
                 title = "Token generated",
-                token = token
+                token
             });
         }
     }

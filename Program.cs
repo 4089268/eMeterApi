@@ -3,6 +3,7 @@ using System.Text;
 using eMeterApi.Data;
 using eMeterApi.Data.Contracts;
 using eMeterApi.Service;
+using eMeterAPi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;

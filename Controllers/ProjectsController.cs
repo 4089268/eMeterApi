@@ -4,11 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using eMeterApi.Data;
+using eMeterApi.Data.Contracts;
 using eMeterApi.Data.Exceptions;
 using eMeterApi.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eMeterApi.Controllers
@@ -16,12 +15,12 @@ namespace eMeterApi.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ProjectController : ControllerBase
+    public class ProjectsController : ControllerBase
     {
 
-        private readonly IProjectService projectService;
+        private readonly IProjectsService projectService;
 
-        public ProjectController(IProjectService projectService)
+        public ProjectsController(IProjectsService projectService)
         {
             this.projectService = projectService;
         }
@@ -30,7 +29,7 @@ namespace eMeterApi.Controllers
         [ProducesResponseType(200)]
         public IActionResult GetProjects()
         {
-            var _data = this.projectService.GetAll();
+            var _data = this.projectService.GetProjects(null, null);
             if(_data == null){
                 return Ok( Array.Empty<SysProyecto>() );
             }
@@ -63,15 +62,14 @@ namespace eMeterApi.Controllers
         [Produces("application/json")]
         public IActionResult StoreProject( [FromBody] SysProyecto proyecto)
         {
-
             if(!ModelState.IsValid){
                 return BadRequest( ModelState );
             }
 
             try
             {
-                var _newSysProyecto = this.projectService.Create(proyecto);
-                return StatusCode( 201, new {id = _newSysProyecto.Id} );
+                var _newSysProyecto = this.projectService.CreateProject(proyecto, out string? message);
+                return StatusCode( 201, new {id = _newSysProyecto } );
             }
             catch (Exception err)
             {
@@ -81,16 +79,16 @@ namespace eMeterApi.Controllers
         }
         
         [HttpDelete]
-        [Route ("{projectID}")]
+        [Route ("{projectId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
-        public IActionResult DeleteProject( [FromRoute] long projectID )
+        public IActionResult DeleteProject( [FromRoute] long projectId )
         {
             try{
-                this.projectService.Remove(projectID);
+                this.projectService.DeletedProject(projectId, out string? message);
                 return Ok( new {
-                    message = $"Project id {projectID} deleted"
+                    message = $"Project id {projectId} deleted"
                 });
             }catch(EntityNotFoundException eNotFound){
                 return BadRequest( new {
@@ -104,16 +102,16 @@ namespace eMeterApi.Controllers
         }
 
         [HttpPatch]
-        [Route ("{projectID}")]
+        [Route ("{projectId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
-        public IActionResult UpdateProject( [FromRoute] long projectID, [FromBody] SysProyecto sysProyecto )
+        public IActionResult UpdateProject( [FromRoute] long projectId, [FromBody] SysProyecto sysProyecto )
         {
             try{
-                this.projectService.Update(projectID, sysProyecto);
+                this.projectService.UpdateProject(projectId, sysProyecto, out string? message);
                 return Ok( new {
-                    message = $"Project id {projectID} deleted"
+                    message = $"Project id {projectId} updated"
                 });
             }catch(EntityNotFoundException eNotFound){
                 return BadRequest( new {
@@ -127,6 +125,28 @@ namespace eMeterApi.Controllers
         }
 
 
+        [HttpPost]
+        [Route ("/user/{userId}")]
+        public IActionResult AssignProyectUsers( [FromQuery] long userId, [FromBody] IEnumerable<long> projects )
+        {
+            throw new NotImplementedException();
+
+            // if(!ModelState.IsValid){
+            //     return BadRequest( ModelState );
+            // }
+
+            // try
+            // {
+            //     var _newSysProyecto = this.projectService.CreateProject(proyecto, out string? message);
+            //     return StatusCode( 201, new {id = _newSysProyecto } );
+            // }
+            // catch (Exception err)
+            // {
+            //     return UnprocessableEntity( new { message = $"Cant store the entity; {err.Message}"} );
+            // }
+            
+        }
+        
 
     }
 }
