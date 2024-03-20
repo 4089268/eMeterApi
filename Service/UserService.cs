@@ -81,7 +81,7 @@ namespace eMeterApi.Service
 
             // Validate if user is already store
             var _user = dbContext.Usuarios.Where( usuario => usuario.Usuario1 == user.Email && usuario.DeletedAt == null ).FirstOrDefault();
-            if( _user == null ){
+            if( _user != null ){
                 throw new SimpleValidationException("Validations fail", new Dictionary<string,string>(){
                     { "email", "The email is already stored in the database "}
                 });
@@ -89,9 +89,10 @@ namespace eMeterApi.Service
 
             // Create user entity
             var newUser = new Entities.Usuario(){
-                Usuario1 =  user.Email,
-                Operador =  user.Name,
-                Password =  user.Password, //TODO: Hash password
+                Usuario1 = user.Email,
+                Operador = user.Name,
+                Password = user.Password, //TODO: Hash password
+                Company = user.Company
             };
 
             // Store the new entity
