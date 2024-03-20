@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace eMeterAPi.Data.Contracts.Models
+namespace eMeterApi.Data.Contracts.Models
 {
     public interface IProject
     {

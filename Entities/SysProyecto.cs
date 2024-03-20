@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using eMeterAPi.Data.Contracts.Models;
+using eMeterApi.Data.Contracts.Models;
 
 namespace eMeterApi.Entities;
 

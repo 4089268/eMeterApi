@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using eMeterApi.Data.Contracts.Models;
-using eMeterAPi.Data.Contracts.Models;
 
 namespace eMeterApi.Data.Contracts
 {

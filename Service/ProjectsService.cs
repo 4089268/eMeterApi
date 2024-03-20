@@ -6,13 +6,13 @@ using System.Reflection;
 using System.Threading.Tasks;
 using eMeterApi.Data;
 using eMeterApi.Data.Contracts;
+using eMeterApi.Data.Contracts.Models;
 using eMeterApi.Data.Exceptions;
 using eMeterApi.Entities;
-using eMeterAPi.Data.Contracts.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace eMeterAPi.Service
+namespace eMeterApi.Service
 {
     public class ProjectsService : IProjectsService
     {
