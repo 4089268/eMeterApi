@@ -43,7 +43,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<JwtSettings>( builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<AppSettings>( o => o.AppKey = builder.Configuration.GetValue<string>("AppKey"));
 
 builder.Services.AddSwaggerGen( options => 
     options.SwaggerDoc("v1", new OpenApiInfo

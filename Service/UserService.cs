@@ -19,12 +19,14 @@ namespace eMeterApi.Service
         private readonly EMeterContext dbContext;
         private readonly ILogger<UserService> logger;
         private readonly JwtSettings jwtSettings;
+        private readonly AppSettings appKeySettings;
 
-        public UserService(EMeterContext eMeterContext, ILogger<UserService> logger, IOptions<JwtSettings> optionsJwt )
+        public UserService(EMeterContext eMeterContext, ILogger<UserService> logger, IOptions<JwtSettings> optionsJwt, IOptions<AppSettings> optionsAppKey )
         {
             this.dbContext = eMeterContext;
             this.logger = logger;
             this.jwtSettings = optionsJwt.Value;
+            this.appKeySettings = optionsAppKey.Value;
         }
 
         public string? Authenticate(IUserCredentials userCredentials, out string? message)
@@ -32,12 +34,14 @@ namespace eMeterApi.Service
             message = null;
             
             // Validate user
+            var hashedPassword = DataHasher.HashDataWithKey( userCredentials.Password, this.appKeySettings.AppKey );
+            
             Entities.Usuario? user = null;
             try{
                 user = dbContext.Usuarios
                     .Where( user =>
                         user.Usuario1 == userCredentials.Email &&
-                        user.Password == userCredentials.Password && 
+                        user.Password == hashedPassword && 
                         user.DeletedAt == null
                     )
                     .FirstOrDefault();
@@ -88,11 +92,13 @@ namespace eMeterApi.Service
                 });
             }
 
+            var hashedPassword = DataHasher.HashDataWithKey( user.Password, appKeySettings.AppKey );
+
             // Create user entity
             var newUser = new Entities.Usuario(){
                 Usuario1 = user.Email,
                 Operador = user.Name,
-                Password = user.Password, //TODO: Hash password
+                Password =  hashedPassword,
                 Company = user.Company
             };
 
@@ -152,6 +158,7 @@ namespace eMeterApi.Service
 
         public bool UpdateUser(long userId, UserUpdateRequest userUpdateRequest, out string? message)
         {
+
             message = null;
             
             // Find user
@@ -167,7 +174,7 @@ namespace eMeterApi.Service
                 _user.Email = userUpdateRequest.Email != null ? userUpdateRequest.Email :_user.Email;
                 _user.Company = userUpdateRequest.Company != null ? userUpdateRequest.Company! : _user.Company;
                 if( userUpdateRequest.Password != null){
-                    var hashedPassword = userUpdateRequest.Password; // TODO: Hash password
+                    var hashedPassword = DataHasher.HashDataWithKey(userUpdateRequest.Password, appKeySettings.AppKey);
                     _user.Password = hashedPassword;
                 }
 
