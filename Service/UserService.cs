@@ -8,6 +8,7 @@ using eMeterApi.Data.Contracts.Models;
 using eMeterApi.Data.Exceptions;
 using eMeterApi.Entities;
 using eMeterApi.Helpers;
+using eMeterApi.Models;
 using Microsoft.Extensions.Options;
 
 namespace eMeterApi.Service
@@ -149,12 +150,12 @@ namespace eMeterApi.Service
             }
         }
 
-        public bool UpdateUser(long userId, IDictionary<string, object>? param, out string? message)
+        public bool UpdateUser(long userId, UserUpdateRequest userUpdateRequest, out string? message)
         {
             message = null;
             
             // Find user
-            var _user = dbContext.Usuarios.Where( item => item.Id == userId && item.DeletedAt == null);
+            var _user = dbContext.Usuarios.Where( item => item.Id == userId && item.DeletedAt == null).FirstOrDefault();
             if( _user == null){
                 throw new SimpleValidationException( "Validations fail", new Dictionary<string,string>(){
                     { "userId", "The user is not found in the database "}
@@ -162,16 +163,12 @@ namespace eMeterApi.Service
             }
 
             try{
-                // Update user dinamically
-                if( param != null ){
-                    var fields = _user.GetType().GetFields(System.Reflection.BindingFlags.SetProperty);
-                    var paramKeys = param.Select( item => item.Key.ToLower()).ToArray<string>();
-                    foreach( var field in fields ){
-                        if( paramKeys.Contains(field.Name.ToLower()))
-                        {
-                            field.SetValue( _user, param[field.Name]);
-                        }
-                    }
+                _user.Name = userUpdateRequest.Name != null ?userUpdateRequest.Name :_user.Name;
+                _user.Email = userUpdateRequest.Email != null ? userUpdateRequest.Email :_user.Email;
+                _user.Company = userUpdateRequest.Company != null ? userUpdateRequest.Company! : _user.Company;
+                if( userUpdateRequest.Password != null){
+                    var hashedPassword = userUpdateRequest.Password; // TODO: Hash password
+                    _user.Password = hashedPassword;
                 }
 
                 // Update database

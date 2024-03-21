@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 using eMeterApi.Data.Contracts.Models;
+using eMeterApi.Models;
 
 namespace eMeterApi.Data.Contracts
 {
@@ -18,7 +18,7 @@ namespace eMeterApi.Data.Contracts
 
         public bool DisableUser( long userId, out string? message);
 
-        public bool UpdateUser( long userId, IDictionary<string, object>? param, out string? message );
+        public bool UpdateUser( long userId, UserUpdateRequest userUpdateRequest, out string? message );
 
     }
 }

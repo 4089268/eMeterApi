@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 using eMeterApi.Data.Contracts;
 using eMeterApi.Data.Contracts.Models;
 using eMeterApi.Data.Exceptions;
-using eMeterApi.Entities;
-using eMeterAPi.Models;
+using eMeterApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -113,27 +112,22 @@ namespace eMeterApi.Controllers
 
         [HttpPatch]
         [Route("{userId}")]
-        public IActionResult UpdateUser( [FromRoute] long userId, [FromBody] UserRequest userRequest )
+        public IActionResult UpdateUser( [FromRoute] long userId, [FromBody] UserUpdateRequest userRequest )
         {
             
             if( !ModelState.IsValid ){
                 return BadRequest( ModelState );
             }
-
-            var userParam = new Dictionary<string,object>();
-            userParam.Add( "Usuario1", userRequest.Email! );
-            userParam.Add( "Operador", userRequest.Name! );
-            userParam.Add( "Empresa", userRequest.Company??"" );
             
             // TODO: has password
 
             try{
 
-                if( this.userService.UpdateUser( userId, userParam , out string? message) ){
+                if( this.userService.UpdateUser( userId, userRequest , out string? message) ){
                     return Ok(
                         new {
-                            Title = "User has been deleted",
-                            Message = "User has been deleted"
+                            Title = "User has been Updated",
+                            Message = "User has been Updated"
                         }
                     );
                 }else{

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using eMeterApi.Data.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace eMeterAPi.Models
+namespace eMeterApi.Models
 {
     public class UserRequest : IUser
     {
@@ -30,8 +30,42 @@ namespace eMeterAPi.Models
         [Required]
         public string? Password {get;set;}
 
+        [JsonPropertyName("password")]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Required]
+        public string? PasswordConfirm {get;set;}
+
+        [JsonPropertyName("company")]
+        public string? Company {get;set;}
+    }
+
+    public class UserUpdateRequest : IUser
+    {
+        [NotMapped]
+        [HiddenInput]
+        public long Id { get => 0; set => throw new NotImplementedException(); }
+
+        [JsonPropertyName("email")]
+        [DataType(DataType.EmailAddress)]
+        public string? Email {get;set;}
+        
+        [JsonPropertyName("name")]
+        public string? Name {get;set;}
+
+        [JsonPropertyName("password")]
+        [DataType(DataType.Password)]
+        public string? Password {get;set;}
+
+        [JsonPropertyName("passwordConfirm")]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string? PasswordConfirm {get;set;}
+
         [JsonPropertyName("company")]
         public string? Company {get;set;}
         
     }
+
+
 }
