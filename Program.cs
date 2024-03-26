@@ -33,7 +33,12 @@ builder.Services.AddAuthentication( o => {
     };
 });
 builder.Services.AddAuthorization();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession( options => {
+    options.IdleTimeout = TimeSpan.FromHours(6);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_connectionString));
 builder.Services.AddDbContext<EMeterContext>( o => {
     o.UseSqlServer( builder.Configuration.GetConnectionString(_connectionString) );
@@ -41,11 +46,12 @@ builder.Services.AddDbContext<EMeterContext>( o => {
 builder.Services.AddScoped<IProjectsService, ProjectsService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<JwtSettings>( builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<AppSettings>( o => o.AppKey = builder.Configuration.GetValue<string>("AppKey"));
 
+// builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen( options => 
     options.SwaggerDoc("v1", new OpenApiInfo
     {
@@ -60,6 +66,7 @@ builder.Services.AddSwaggerGen( options =>
     })
 );
 
+
 // Configure logger
 builder.Host.ConfigureLogging( logging => {
     logging.ClearProviders();
@@ -72,7 +79,6 @@ builder.Host.ConfigureLogging( logging => {
         });
     }
 });
-
 builder.Services.AddHttpLogging(configureOptions => { 
     configureOptions.LoggingFields = HttpLoggingFields.All;
 });
@@ -82,10 +88,19 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI( o => o.SwaggerEndpoint("/swagger/v1/swagger.json", "eMeter API V1") );
+app.UseSession();
 
 app.UseHttpLogging();
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+
+app.UseRouting();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
 app.Run();

@@ -21,13 +21,7 @@ namespace eMeterApi.Controllers
             this.logger = logger;
             this.dbRepository = repository;
         }
-
-        [HttpGet]
-        [Route("/")]
-        public IActionResult Index() {
-            return Ok( "eMeter 1.1" );
-        }
-
+        
 
         /// <summary>
         /// Store a digital measure 

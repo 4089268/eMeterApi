@@ -1,55 +1,30 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using eMeterApi.Data;
+using System.Threading.Tasks;
 using eMeterApi.Data.Contracts;
-using eMeterApi.Helpers;
-using eMeterApi.Models.ViewModel;
-using eMeterApi.Service;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace eMeterApi.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthenticationController : ControllerBase
+    [Route("[controller]")]
+    public class AuthenticationController : Controller
     {
-
+        private readonly ILogger<AuthenticationController> logger;
         private readonly IUserService userService;
 
-        public AuthenticationController( IUserService userService){
-            this.userService = userService;
-        } 
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="authenticationRequest"></param>
-        /// <returns></returns>
-        /// <response code="200">Authentication valida</response>
-        /// <response code="401">Credentials invalid</response>
-        [HttpPost]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(401)]
-        public IActionResult Authenticated( [FromBody] AuthenticationRequest authenticationRequest )
+        public AuthenticationController(ILogger<AuthenticationController> logger, IUserService userService)
         {
-            if(!ModelState.IsValid){
-                return BadRequest(ModelState);
-            }
-
-            var token = userService.Authenticate( authenticationRequest, out string? message );
-            if( token == null){
-                return Unauthorized( new {
-                    message = message
-                });
-            }
-
-            return Ok( new {
-                title = "Token generated",
-                token
-            });
+            this.logger = logger;
+            this.userService = userService;
         }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+       
     }
 }
