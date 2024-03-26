@@ -1,0 +1,251 @@
+@model eMeter.Models.DeviceDetails
+
+@functions{
+    DeviceDetails GetDetails()
+    {
+        return (DeviceDetails) ViewBag.Device;
+    }
+    Device GetDeviceInfo()
+    {
+        return GetDetails().Device;
+    }
+}
+
+<div class="container-fluid dashboard-content">
+    
+    <!-- pageheader -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="page-header">
+                <h1 class="mb-2">Detalle Medidor</h1>
+                <p class="pageheader-text">Proin placerat ante duiullam scelerisque a velit ac porta, fusce sit amet vestibulum mi. Morbi lobortis pulvinar quam.</p>
+                <div class="page-breadcrumb">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" aria-current="page">
+                                <a asp-action="Index" asp-asp-controller="Devices" class="breadcrumb-link">Devices</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Device: @GetDetails().DeviceAddress </li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end pageheader -->
+    
+    
+    <div class="row">
+        <!-- device card  -->
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="card influencer-profile-data">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-4 col-12">
+                            <div class="text-center">
+                                <img src="/img/valve.png" alt="User Avatar" class="rounded-circle user-avatar-xxl" />
+                            </div>
+                        </div>
+                        <div class="col-xl-10 col-lg-8 col-md-8 col-sm-8 col-12">
+                            <div class="user-avatar-info">
+                                <div class="m-b-20">
+                                    <div class="user-avatar-name">
+                                        <h2 class="mb-1">DEV @GetDetails().DeviceAddress</h2>
+                                    </div>
+                                    <div class="rating-star  d-inline-block">
+                                        <p class="d-inline-block text-dark">14</p>
+                                    </div>
+                                </div>
+                                <!--  <div class="float-right"><a href="#" class="user-avatar-email text-secondary">www.henrybarbara.com</a></div> -->
+                                <div class="user-avatar-address">
+                                    <p class="border-bottom pb-3">
+                                        <span class="d-xl-inline-block d-block mb-2">
+                                            <i class="fa fa-calendar-alt mr-2 text-primary"></i>
+                                            <span class="m-l-0">Ultimo Registro: @GetDeviceInfo().LastUpdate.ToString("dd-MM-yyyy HH:mm:ss")</span>
+                                        </span>
+
+                                        <span class="mb-2 ml-xl-4 d-xl-inline-block d-block">
+                                            <i class="fa fa-calendar-alt mr-2 text-primary"></i>
+                                            <span class="m-l-0">Fecha Dispositivo: @GetDeviceInfo().DevDate @GetDeviceInfo().DevTime </span>
+                                        </span>
+
+                                        <span class=" mb-2 d-xl-inline-block d-block ml-xl-4">
+                                            <i class="fa fa-battery-half mr-2  text-primary"></i>
+                                            <span class="m-l-0">Bateria: @GetDeviceInfo().Battery </span>
+                                        </span>
+
+                                        <span class=" mb-2 d-xl-inline-block d-block ml-xl-4">
+                                            <i class="fa fa-bullseye mr-2  text-primary"></i>
+                                            <span class="m-l-0">Valvula: @GetDeviceInfo().Valve </span>
+                                        </span>
+
+                                        <span class=" mb-2 d-xl-inline-block d-block ml-xl-4">
+                                            <i class="fa fa-map-marker-alt mr-2  text-primary"></i>
+                                            <span class="m-l-0">Ubicacion: Ciudad, Estado </span>
+                                        </span>
+
+                                    </p>
+                                    <div class="mt-3">
+                                        <a href="#" class="mr-1 badge badge-light">Nombre projecto 1</a>
+                                        <a href="#" class="mr-1 badge badge-light">Nombre projecto 2</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-top user-social-box">
+                    <div class="px-2 d-inline-block ">
+                        <a href="#" class="btn btn-primary active">Cerrar Valvula</a>
+                        <a href="#" class="btn btn-primary active">Exportar Datos</a>
+                        <a href="#" class="btn btn-primary active">Generar Reporte</a>
+                    </div>
+                    
+                    <div class="user-social-media d-xl-inline-block ">
+                        <span class="mr-2 medium-color">
+                            <i class="fab fa-medium"></i>
+                        </span>
+                        <span>123# Some Indicator</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- device card  -->
+    </div>
+
+
+    <!-- Chart -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="card">
+                <h4 class="card-header">Registros por dias (No implementado)</h5>
+                <div class="card-body" style="height: 12rem;">
+                    <div class="ct-chart-line ct-golden-section h-100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end chart -->
+
+    <!-- Measurement table -->
+    <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="card">
+                <h4 class="card-header">Ultimos registros</h5>
+                <div class="card-body">
+                    <div class="campaign-table table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr class="border-0">
+                                    <th class="border-0"></th>
+                                    <th class="border-0">Meter Address</th>
+                                    <th class="border-0">DataId</th>
+                                    <th class="border-0">Cummulative Flow</th>
+                                    <th class="border-0">CFUnit</th>
+                                    <th class="border-0">Dayli C. Amount</th>
+                                    <th class="border-0">DCFUnit</th>
+                                    <th class="border-0">Flow Rate</th>
+                                    <th class="border-0">FRUnit</th>
+                                    <th class="border-0">Temperature</th>
+                                    <th class="border-0">Dev Date</th>
+                                    <th class="border-0">Dev Time</th>
+                                    <th class="border-0">Valve</th>
+                                    <th class="border-0">Battery</th>
+                                    <th class="border-0">Reverse Flow</th>
+                                    <th class="border-0">Over Range</th>
+                                    <th class="border-0">Water Temp</th>
+                                    <th class="border-0">EE Alarm</th>
+                                    <th class="border-0">Registration Date</th>
+                                    <th class="border-0">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach( Measurement measurement in GetDetails().Measurement )
+                                {
+                                <tr>
+                                    <td>
+                                        <div class="m-r-10">
+                                            <img src="/img/valve.png" alt="valve" width="35">
+                                        </div>
+                                    </td>
+                                    <td> @measurement.MeterAddress </td>
+                                    <td> @measurement.DataId </td>
+                                    <td> @measurement.CummulativeFlow.ToString("n2") </td>
+                                    <td> @measurement.CfUnit </td>
+                                    <td> @measurement.DayliCumulativeAmount.ToString("n2") </td>
+                                    <td> @measurement.CfUnitSetDay</td>
+                                    <td> @measurement.FlowRate.ToString("n2")</td>
+                                    <td> @measurement.FlowRateUnit</td>
+                                    <td> @measurement.Temperature.ToString("n2")</td>
+                                    <td> @measurement.DevDate</td>
+                                    <td> @measurement.DevTime</td>
+                                    <td> @measurement.Valve.ToUpper()</td>
+                                    <td> @measurement.Battery.ToUpper()</td>
+                                    <td> @measurement.ReverseFlow.ToUpper()</td>
+                                    <td> @measurement.OverRange.ToUpper()</td>
+                                    <td> @measurement.WaterTemp.ToUpper()</td>
+                                    <td> @measurement.Eealarm.ToUpper()</td>
+                                    <td> @measurement.RegistrationDate</td>
+                                    <td>
+                                        @*
+                                        <div class="dropdown float-right">
+                                            <a href="#" class="dropdown-toggle card-drop" data-toggle="dropdown" aria-expanded="true">
+                                                <i class="mdi mdi-dots-vertical"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <!-- item-->
+                                                <a href="javascript:void(0);" class="dropdown-item">Sales Report</a>
+                                                <!-- item-->
+                                                <a href="javascript:void(0);" class="dropdown-item">Export Report</a>
+                                                <!-- item-->
+                                                <a href="javascript:void(0);" class="dropdown-item">Profit</a>
+                                                <!-- item-->
+                                                <a href="javascript:void(0);" class="dropdown-item">Action</a>
+                                            </div>
+                                        </div>
+                                        *@
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end table -->
+    
+</div>
+
+
+@section Scripts {
+    <script src="/assets/vendor/slimscroll/jquery.slimscroll.js"></script>
+    <script src="/assets/vendor/charts/chartist-bundle/chartist.min.js"></script>
+    <script src="/assets/libs/js/main-js.js"></script>
+    <script>
+
+        (function (window, document, $, undefined) {
+            "use strict";
+            $(function () {
+                if ($(".ct-chart-line").length) {
+                    new Chartist.Line(
+                        ".ct-chart-line",
+                        {
+                            labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabador", "Domingo"],
+                            series: [ [12, 9, 7, 8, 5,2,4] ],
+                        },
+                        {
+                            fullWidth: true,
+                            chartPadding: {
+                                right: 40,
+                            },
+                            axisY: {},
+                        }
+                    );
+                }
+            });
+            })(window, document, window.jQuery);
+        
+    </script>
+}

@@ -12,7 +12,7 @@ using eMeterApi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace eMeterApi.Controllers
+namespace eMeterApi.Controllers.API
 {
     [Authorize]
     [ApiController]

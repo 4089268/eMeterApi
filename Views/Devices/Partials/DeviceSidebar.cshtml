@@ -1,0 +1,58 @@
+@using  eMeter.Models
+
+<div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-12">
+    <div class="card sticky-top">
+    @using( Html.BeginForm("Index", "Devices", FormMethod.Get)){
+    
+        <div class="card-body border-top">
+            <h3 class="font-16">Estatus Valvula</h3>
+            <select class="form-control" name="SV">
+                <option selected value="">Todos</option>
+                <option value="closed">Closed</option>
+                <option value="open">Open</option>
+                <option value="otro">Other</option>
+            </select>
+        </div>
+
+        <div class="card-body border-top">
+            <h3 class="font-16">Estatus Bateria</h3>
+            <select class="form-control" name="SB">
+                <option selected value="">Todos</option>
+                <option value="low battery">Low Battery</option>
+                <option value="normal">Normal</option>
+                <option value="otro">Other</option>
+            </select>
+        </div>
+
+        @if(ViewBag.Projects != null){
+        <div class="card-body border-top">
+            <h3 class="font-16">Projecto</h3>
+            <select class="form-control" name="PI">
+                <option selected value="">Todos</option>
+                @foreach( var project in (IEnumerable<Project>) ViewBag.Projects ){
+                    <option value="@project.Id">@project.Proyecto</option>
+                }
+            </select>
+        </div>
+        }
+
+        @if(ViewBag.Projects != null){
+        <div class="card-body border-top">
+            <h3 class="font-16">Projectos</h3>
+
+            @foreach( var project in (IEnumerable<Project>) ViewBag.Projects ){
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="@project.Id" value="">
+                <label class="custom-control-label" for="customCheck10">@project.Proyecto</label>
+            </div>
+            }
+        </div>
+        }
+        
+        <div class="card-body border-top">
+            <input type="submit" class="btn btn-secondary btn-lg btn-block" />
+        </div>
+
+    }
+    </div>
+</div>

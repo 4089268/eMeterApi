@@ -1,14 +1,15 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using eMeterApi.Data;
-using eMeterApi.Data.Contracts;
-using eMeterApi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using eMeterApi.Data;
+using eMeterApi.Data.Contracts;
+using eMeterApi.Service;
+using eMeter.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,7 @@ builder.Services.AddDbContext<EMeterContext>( o => {
 });
 builder.Services.AddScoped<IProjectsService, ProjectsService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<DeviceService>();
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 
