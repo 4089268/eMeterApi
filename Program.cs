@@ -47,6 +47,7 @@ builder.Services.AddDbContext<EMeterContext>( o => {
 builder.Services.AddScoped<IProjectsService, ProjectsService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<DeviceService>();
+builder.Services.AddScoped<MeasurementService>();
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 

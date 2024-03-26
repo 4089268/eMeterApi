@@ -1,0 +1,180 @@
+﻿@model eMeter.Models.ViewModels.MeasurementViewModel
+<div class="dashboard-ecommerce">
+    <div class="container-fluid dashboard-content ">
+        
+        <!-- pageheader  -->
+        <div class="row">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div class="page-header">
+                    <h2 class="pageheader-title">Notificaciones del dispositivo</h2>
+                    <div class="page-breadcrumb">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item active">Measurement</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end pageheader  -->
+
+
+        <div class="row">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 pb-0">
+                <div class="border bg-white px-3 py-1 mb-2">
+                    @using( Html.BeginForm("Index", "Measurement", FormMethod.Get)){
+                        <div class="d-flex align-items-end" >
+                            <div class="form-group mr-1">
+                                <label asp-for="Desde" class="col-form-label">Desde</label>
+                                <input asp-for="Desde" class="form-control">
+                            </div>
+
+                            <div class="form-group mr-1">
+                                <label asp-for="Hasta" class="col-form-label">Hasta</label>
+                                <input asp-for="Hasta" class="form-control">
+                            </div>
+
+                            <div class="form-group mr-1">
+                                <label asp-for="DeviceAddress" class="col-form-label">Metter Address</label>
+                                <input asp-for="DeviceAddress" class="form-control">
+                            </div>
+
+                            <div class="form-group mr-1">
+                                <input type="submit" class="btn btn-primary px-5" value="Enviar" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Measurement table -->
+        <div class="row">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="campaign-table table-responsive">
+                            <table id="dataTable" class="table second table-striped table-bordered" style="width:100%" >
+                                <thead>
+                                    <tr class="border-0">
+                                        <th class="border-0 text-center"></th>
+                                        <th class="border-0 text-center">Meter Address</th>
+                                        <th class="border-0 text-center">DataId</th>
+                                        <th class="border-0 text-center">Cummulative Flow</th>
+                                        <th class="border-0 text-center">CFUnit</th>
+                                        <th class="border-0 text-center">Dayli C. Amount</th>
+                                        <th class="border-0">DCFUnit</th>
+                                        <th class="border-0">Flow Rate</th>
+                                        <th class="border-0">FRUnit</th>
+                                        <th class="border-0">Temperature</th>
+                                        <th class="border-0">Dev Date</th>
+                                        <th class="border-0">Dev Time</th>
+                                        <th class="border-0">Valve</th>
+                                        <th class="border-0">Battery</th>
+                                        <th class="border-0">Reverse Flow</th>
+                                        <th class="border-0">Over Range</th>
+                                        <th class="border-0 text-center">Water Temp</th>
+                                        <th class="border-0 text-center">EE Alarm</th>
+                                        <th class="border-0 text-center">Registration Date</th>
+                                        <th class="border-0 text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach( Measurement measurement in (IEnumerable<Measurement>) ViewBag.Measurements )
+                                    {
+                                    <tr>
+                                        <td>
+                                            <div class="m-r-10">
+                                                <img src="/img/valve.png" alt="valve" width="35">
+                                            </div>
+                                        </td>
+                                        <td> @measurement.MeterAddress </td>
+                                        <td> @measurement.DataId </td>
+                                        <td> @measurement.CummulativeFlow.ToString("n2") </td>
+                                        <td> @measurement.CfUnit </td>
+                                        <td> @measurement.DayliCumulativeAmount.ToString("n2") </td>
+                                        <td> @measurement.CfUnitSetDay</td>
+                                        <td> @measurement.FlowRate.ToString("n2")</td>
+                                        <td> @measurement.FlowRateUnit</td>
+                                        <td> @measurement.Temperature.ToString("n2")</td>
+                                        <td> @measurement.DevDate</td>
+                                        <td> @measurement.DevTime</td>
+                                        <td> @measurement.Valve.ToUpper()</td>
+                                        <td> @measurement.Battery.ToUpper()</td>
+                                        <td> @measurement.ReverseFlow.ToUpper()</td>
+                                        <td> @measurement.OverRange.ToUpper()</td>
+                                        <td> @measurement.WaterTemp.ToUpper()</td>
+                                        <td> @measurement.Eealarm.ToUpper()</td>
+                                        <td> @measurement.RegistrationDate</td>
+                                        <td>
+                                            @*
+                                            <div class="dropdown float-right">
+                                                <a href="#" class="dropdown-toggle card-drop" data-toggle="dropdown" aria-expanded="true">
+                                                    <i class="mdi mdi-dots-vertical"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right">
+                                                    <!-- item-->
+                                                    <a href="javascript:void(0);" class="dropdown-item">Sales Report</a>
+                                                    <!-- item-->
+                                                    <a href="javascript:void(0);" class="dropdown-item">Export Report</a>
+                                                    <!-- item-->
+                                                    <a href="javascript:void(0);" class="dropdown-item">Profit</a>
+                                                    <!-- item-->
+                                                    <a href="javascript:void(0);" class="dropdown-item">Action</a>
+                                                </div>
+                                            </div>
+                                            *@
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- end table -->
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/vendor/datatables/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="/assets/vendor/datatables/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.colVis.min.js"></script>
+    <script src="https://cdn.datatables.net/rowgroup/1.0.4/js/dataTables.rowGroup.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.2.7/js/dataTables.select.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
+
+    <script>
+        if ($("#dataTable").length) {
+            $(document).ready(function() {
+
+                var viewportHeight = (window.innerHeight - 470);
+
+                var table = $('#dataTable').DataTable({
+                    lengthChange: false,
+                    buttons: ['copy', 'excel', 'pdf', 'print' ],
+                    searching: false,
+                    paging: true,
+                    pageLength: 100
+                });
+                @* scrollY: viewportHeight *@
+
+                table.buttons().container().appendTo('#dataTable_wrapper .col-md-6:eq(0)');
+            });
+        }
+    </script>
+}
