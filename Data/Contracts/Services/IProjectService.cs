@@ -7,7 +7,7 @@ using eMeterApi.Data.Contracts.Models;
 
 namespace eMeterApi.Data.Contracts
 {
-    public interface IProjectsService
+    public interface IProjectService
     {
         public IEnumerable<IProject>? GetProjects( long? userId, string? groupId );
         public long? CreateProject( IProject project, out string? message );

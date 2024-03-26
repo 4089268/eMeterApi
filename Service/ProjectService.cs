@@ -14,13 +14,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace eMeterApi.Service
 {
-    public class ProjectsService : IProjectsService
+    public class ProjectService : IProjectService
     {
 
         private readonly EMeterContext dbContext;
-        private readonly ILogger<ProjectsService> logger;
+        private readonly ILogger<ProjectService> logger;
 
-        public ProjectsService( EMeterContext dbContext, ILogger<ProjectsService> logger )
+        public ProjectService( EMeterContext dbContext, ILogger<ProjectService> logger )
         {
             this.dbContext = dbContext;
             this.logger = logger;

@@ -1,152 +1,124 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using eMeterApi.Data.Contracts;
-using eMeterApi.Data.Exceptions;
-using eMeterApi.Entities;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using eMeter.Data;
+using eMeterApi.Data.Contracts;
+using eMeter.Models;
+using eMeter.Models.ViewModels.Projects;
+using eMeterApi.Data.Contracts.Models;
 
-namespace eMeterApi.Controllers
+namespace eMeterSite.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProjectsController : ControllerBase
+    
+    [Auth]
+    [Route("[controller]")]
+    public class ProjectsController(ILogger<ProjectsController> logger, IProjectService projectService) : Controller
     {
+        private readonly ILogger<ProjectsController> _logger = logger;
+        private readonly IProjectService projectService = projectService;
 
-        private readonly IProjectsService projectService;
-
-        public ProjectsController(IProjectsService projectService)
+    
+        public IActionResult Index()
         {
-            this.projectService = projectService;
-        }
-
-        [HttpGet]
-        [ProducesResponseType(200)]
-        public IActionResult GetProjects()
-        {
-            var _data = this.projectService.GetProjects(null, null);
-            if(_data == null){
-                return Ok( Array.Empty<SysProyecto>() );
-            }
-
-            var results = new List<dynamic>();
-            foreach( var item in _data){
-                results.Add( new {
-                    Id = item.Id,
-                    Proyecto = item.Proyecto,
-                    Clave = item.Clave
-                });
-            }
-
-            return Ok(results);
-        }
-
-
-        /// <summary>
-        /// Store a new entity of SysProyecto at the database
-        /// </summary>
-        /// <param name="proyecto"></param>
-        /// <returns>A entity created</returns>
-        /// <response code="201">Returns the newly created item</response>
-        /// <response code="400">The request is not valid</response>
-        /// <response code="422">Cant store the entity on the database</response>
-        [HttpPost]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
-        [Produces("application/json")]
-        public IActionResult StoreProject( [FromBody] SysProyecto proyecto)
-        {
-            if(!ModelState.IsValid){
-                return BadRequest( ModelState );
-            }
-
+            var projects = Array.Empty<Project>();
             try
             {
-                var _newSysProyecto = this.projectService.CreateProject(proyecto, out string? message);
-                return StatusCode( 201, new {id = _newSysProyecto } );
+                var response =  projectService.GetProjects( null, null);
+                if( response != null){
+                    projects =  (Project[]) response.ToArray();
+                }
             }
-            catch (Exception err)
+            catch (System.Exception ex)
             {
-                return UnprocessableEntity( new { message = $"Cant store the entity; {err.Message}"} );
+                //TODO: Handle the error
+                ViewData["ErrorMessage"] = ex.Message;
             }
-            
+
+            return View( projects );
+
         }
         
-        [HttpDelete]
-        [Route ("{projectId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
-        public IActionResult DeleteProject( [FromRoute] long projectId )
-        {
-            try{
-                this.projectService.DeletedProject(projectId, out string? message);
-                return Ok( new {
-                    message = $"Project id {projectId} deleted"
-                });
-            }catch(EntityNotFoundException eNotFound){
-                return BadRequest( new {
-                    message = eNotFound.Message
-                });
-            }catch(Microsoft.EntityFrameworkCore.DbUpdateException dbException ){
-                return UnprocessableEntity( new {
-                    message = dbException.Message
-                });
-            }
+        [Route("create")]
+        public IActionResult Create(){
+            return View();
         }
 
-        [HttpPatch]
-        [Route ("{projectId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
-        public IActionResult UpdateProject( [FromRoute] long projectId, [FromBody] SysProyecto sysProyecto )
-        {
-            try{
-                this.projectService.UpdateProject(projectId, sysProyecto, out string? message);
-                return Ok( new {
-                    message = $"Project id {projectId} updated"
-                });
-            }catch(EntityNotFoundException eNotFound){
-                return BadRequest( new {
-                    message = eNotFound.Message
-                });
-            }catch(Microsoft.EntityFrameworkCore.DbUpdateException dbException ){
-                return UnprocessableEntity( new {
-                    message = dbException.Message
-                });
-            }
-        }
-
-
+        [Route("store")]
         [HttpPost]
-        [Route ("/user/{userId}")]
-        public IActionResult AssignProyectUsers( [FromQuery] long userId, [FromBody] IEnumerable<long> projects )
-        {
-            throw new NotImplementedException();
+        public IActionResult Store(NewProjectViewModel newProject){
 
-            // if(!ModelState.IsValid){
-            //     return BadRequest( ModelState );
-            // }
+            if (!ModelState.IsValid)
+            {
+                return View("Create", newProject); // Pass the model back to the view
+            }
 
-            // try
-            // {
-            //     var _newSysProyecto = this.projectService.CreateProject(proyecto, out string? message);
-            //     return StatusCode( 201, new {id = _newSysProyecto } );
-            // }
-            // catch (Exception err)
-            // {
-            //     return UnprocessableEntity( new { message = $"Cant store the entity; {err.Message}"} );
-            // }
-            
+            try{
+
+                var projectId = this.projectService.CreateProject( newProject, out string message );
+
+            }catch(ValidationException){
+                ModelState.AddModelError("Clave", "La clave ya se encuentra almacenada en la base de datos");
+                return View("Create", newProject);
+            }
+
+            return RedirectToAction("Index", "Projects");
+
         }
-        
+
+        [Route("{projectId}")]
+        [HttpGet]
+        public IActionResult Edit( [FromRoute] int projectId ){
+            
+            try{
+                var projects = this.projectService.GetProjects( null, null);
+                if( projects == null){
+                    ViewData["ErrorMessage"] = "Erro al obtener el listado de projectos";
+                    return View("Index", Array.Empty<Project>() );
+                }
+                
+                var project = projects!.Where( item => item.Id == projectId).FirstOrDefault();
+                if(project == null){
+                    ViewData["ErrorMessage"] = "El proyecto no se encuentra registrado o esta inactivo.";
+                    return View("Index", projects );
+                }
+                
+                // Retrive the edit project to edit
+                var projectViewModel = new NewProjectViewModel{
+                    Proyecto = project.Proyecto,
+                    Clave = project.Clave
+                };
+                ViewData["ProjectId"] = project.Id;
+                return View( projectViewModel );
+
+            }catch(Exception err){
+                ViewData["ErrorMessage"] = err.Message;
+                return View("Index", Array.Empty<Project>()  );
+            }
+        }
+
+        [Route("{projectId}")]
+        [HttpPost]
+        public IActionResult Update( NewProjectViewModel newProject, [FromRoute] int projectId ){
+            
+            if (!ModelState.IsValid)
+            {
+                return View("Edit", newProject);
+            }
+
+            try{
+                this.projectService.UpdateProject( projectId, newProject, out string message);
+            }catch(Exception err){
+                this._logger.LogError(err, "Error at udate project");
+            }
+
+            return RedirectToAction("Index", "Projects");
+        }
+
 
     }
 }

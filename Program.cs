@@ -44,7 +44,7 @@ builder.Services.AddScoped<EMeterRepository>(provider => new EMeterRepository(_c
 builder.Services.AddDbContext<EMeterContext>( o => {
     o.UseSqlServer( builder.Configuration.GetConnectionString(_connectionString) );
 });
-builder.Services.AddScoped<IProjectsService, ProjectsService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<DeviceService>();
 builder.Services.AddScoped<MeasurementService>();
