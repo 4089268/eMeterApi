@@ -159,7 +159,15 @@
                                 </div>
                                 <a class="dropdown-item" href="#"><i class="fas fa-user mr-2"></i>Account</a>
                                 <a class="dropdown-item" href="#"><i class="fas fa-cog mr-2"></i>Setting</a>
-                                <a class="dropdown-item" href="#"><i class="fas fa-power-off mr-2"></i>Logout</a>
+                                <a class="dropdown-item p-0">
+                                    <form class="px-2 py-3" id="selectLanguage" asp-controller="Authentication" asp-action="Logout" method="post">
+                                        <button type="submit" class="btn btn-reset w-100 h-100 text-left">
+                                            <i class="fas fa-power-off mr-2"></i>
+                                            <span>Cerrar Sesion</span>
+                                        </button>
+                                    </form>
+                                </a>
+
                             </div>
                         </li>
                     </ul>

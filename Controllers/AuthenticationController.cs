@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using eMeterApi.Data.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using eMeterApi.Data.Contracts;
+using eMeter.Models.ViewModels;
 
 namespace eMeterApi.Controllers
 {
@@ -25,6 +26,32 @@ namespace eMeterApi.Controllers
         {
             return View();
         }
-       
+
+        [HttpPost]
+        public IActionResult Login( AuthenticationViewModel authenticationViewModel)
+        {
+
+            var token = userService.Authenticate( authenticationViewModel, out string? message );
+
+            if( token == null){
+                authenticationViewModel.MessageError = message;
+                ViewData["ErrorMessage"] = "Usuario y/o contraseña incorrectos.";
+                return View("index", authenticationViewModel);
+            }
+            
+            // Store token securely, e.g., in session
+            HttpContext.Session.SetString( "JWTToken", token);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [Route("logout")]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }

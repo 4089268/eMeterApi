@@ -4,10 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using eMeterApi.Data.Contracts.Models;
 
 namespace eMeter.Models.ViewModels
 {
-    public class AuthenticationViewModel
+    public class AuthenticationViewModel : IUserCredentials
     {
 
         [Required]
