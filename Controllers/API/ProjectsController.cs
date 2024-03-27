@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using eMeter.Models;
 using eMeterApi.Data.Contracts;
 using eMeterApi.Data.Exceptions;
 using eMeterApi.Entities;
@@ -68,7 +69,11 @@ namespace eMeterApi.API.Controllers
 
             try
             {
-                var _newSysProyecto = this.projectService.CreateProject(proyecto, out string? message);
+                var project = new Project{
+                    Clave = proyecto.Clave??"",
+                    Proyecto = proyecto.Proyecto??""
+                };
+                var _newSysProyecto = this.projectService.CreateProject( project, out string? message);
                 return StatusCode( 201, new {id = _newSysProyecto } );
             }
             catch (Exception err)
@@ -109,7 +114,11 @@ namespace eMeterApi.API.Controllers
         public IActionResult UpdateProject( [FromRoute] long projectId, [FromBody] SysProyecto sysProyecto )
         {
             try{
-                this.projectService.UpdateProject(projectId, sysProyecto, out string? message);
+                 var project = new Project{
+                    Clave = sysProyecto.Clave??"",
+                    Proyecto = sysProyecto.Proyecto??""
+                };
+                this.projectService.UpdateProject(projectId, project, out string? message);
                 return Ok( new {
                     message = $"Project id {projectId} updated"
                 });

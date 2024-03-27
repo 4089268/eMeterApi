@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using eMeter.Models;
 using eMeterApi.Data;
 using eMeterApi.Data.Contracts;
 using eMeterApi.Data.Contracts.Models;
@@ -27,7 +28,7 @@ namespace eMeterApi.Service
         }
 
 
-        public IEnumerable<IProject>? GetProjects(long? userId, string? groupId)
+        public IEnumerable<Project>? GetProjects(long? userId, string? groupId)
         {
             var query = dbContext.SysProyectos.Where( p => p.DeletedAt ==null).AsQueryable();
 
@@ -39,11 +40,15 @@ namespace eMeterApi.Service
                 query = query.Where( x => x.SysProyectoUsuarios.Any( u => u.IdUsuario == userId!));
             }
 
-            return query.ToList();
+            return query.Select( item => new Project {
+                Id = item.Id,
+                Proyecto = item.Proyecto??"",
+                Clave = item.Clave??""
+            }).ToList();
         }
 
 
-        public long? CreateProject(IProject project, out string? message)
+        public long? CreateProject(Project project, out string? message)
         {
             message = null;
 
@@ -99,7 +104,7 @@ namespace eMeterApi.Service
         }
 
         
-        public bool UpdateProject(long projectId, IProject project, out string? message)
+        public bool UpdateProject(long projectId, Project project, out string? message)
         {
             message = null;
 
@@ -169,6 +174,6 @@ namespace eMeterApi.Service
                 logger.LogError(err, "Cant update relations user-proyects");
                 return false;
             }
-        }   
+        }
     }
 }       

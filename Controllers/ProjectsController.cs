@@ -30,11 +30,12 @@ namespace eMeterSite.Controllers
             {
                 var response =  projectService.GetProjects( null, null);
                 if( response != null){
-                    projects =  (Project[]) response.ToArray();
+                    projects = response.ToArray();
                 }
             }
             catch (System.Exception ex)
             {
+                Console.WriteLine(ex.StackTrace);
                 //TODO: Handle the error
                 ViewData["ErrorMessage"] = ex.Message;
             }
@@ -59,7 +60,15 @@ namespace eMeterSite.Controllers
 
             try{
 
-                var projectId = this.projectService.CreateProject( newProject, out string message );
+                var project = new Project{
+                    Proyecto = newProject.Proyecto??"",
+                    Clave = newProject.Clave??""
+                };
+
+                var projectId = this.projectService.CreateProject( project, out string? message );
+                if( message != null){
+                    _logger.LogWarning( message );
+                }
 
             }catch(ValidationException){
                 ModelState.AddModelError("Clave", "La clave ya se encuentra almacenada en la base de datos");
@@ -111,7 +120,14 @@ namespace eMeterSite.Controllers
             }
 
             try{
-                this.projectService.UpdateProject( projectId, newProject, out string message);
+                var project = new Project{
+                    Proyecto = newProject.Proyecto??"",
+                    Clave = newProject.Clave??""
+                };
+                this.projectService.UpdateProject( projectId, project, out string? message);
+                if( message != null){
+                    this._logger.LogWarning( message );
+                }
             }catch(Exception err){
                 this._logger.LogError(err, "Error at udate project");
             }
