@@ -12,6 +12,7 @@ using eMeterApi.Helpers;
 using eMeterApi.Models;
 using Microsoft.Extensions.Options;
 using eMeterApi.Models.ViewModels.Users;
+using System.Collections.Immutable;
 
 namespace eMeterApi.Service
 {
@@ -90,7 +91,7 @@ namespace eMeterApi.Service
             var _user = dbContext.Usuarios.Where( usuario => usuario.Usuario1 == user.Email && usuario.DeletedAt == null ).FirstOrDefault();
             if( _user != null ){
                 throw new SimpleValidationException("Validations fail", new Dictionary<string,string>(){
-                    { "email", "The email is already stored in the database "}
+                    { "email", "El correo electrónico ya se encuentra registrado en la base de datos"}
                 });
             }
 
@@ -98,23 +99,44 @@ namespace eMeterApi.Service
 
             // Create user entity
             var newUser = new Entities.Usuario(){
-                Usuario1 = user.Email,
+                Usuario1 = user.Email!,
                 Operador = user.Name,
                 Password =  hashedPassword,
                 Company = user.Company
             };
 
             // Store the new entity
+            long userId = 0;
             try{
                 dbContext.Usuarios.Add( newUser );
                 dbContext.SaveChanges();
-                return newUser.Id;
+                userId =  newUser.Id;
 
             }catch(Exception err){
                 logger.LogError(err, "Error at stored new user at UserService.CreateUser");
                 message = "Fail to create new user; " + err.Message;
                 return null;
             }
+
+            // Attach the projects ids
+            try
+            {
+                var projects = dbContext.SysProyectos.Where( item => user.ProjectsId.Contains( item.Id ) ).ToImmutableArray();
+                foreach( var project in projects ){
+                    dbContext.SysProyectoUsuarios.Add( new SysProyectoUsuario {
+                        IdUsuario = userId,
+                        IdProyecto = project.Id
+                    });
+                }
+                dbContext.SaveChanges();
+            }
+            catch (System.Exception ex)
+            {
+                this.logger.LogError("Can't attach the proyects to the user at UserService. CreateUser; {message}", ex.Message);
+            }
+
+            return  userId;
+
         }
 
         public bool DisableUser(long userId, out string? message)

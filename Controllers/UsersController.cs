@@ -5,13 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http.HttpResults;
 using eMeter.Data;
 using eMeter.Models;
 using eMeter.Models.ViewModels.Projects;
 using eMeterApi.Service;
 using eMeterApi.Data.Contracts;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using eMeterApi.Models.ViewModels.Users;
+using eMeterApi.Data.Exceptions;
 
 namespace eMeterSite.Controllers
 {
@@ -49,39 +51,58 @@ namespace eMeterSite.Controllers
         [HttpGet]
         public IActionResult Create(){
 
-            // TODO: Get list of projects availables
+            // Get list of projects availables and make a multi select list
             var _projects = this.projectService.GetProjects(null, null)??[];
-
-            var projectsAvailable = new List<KeyValuePair<string, long>>();
-            foreach( var project in _projects){
-                projectsAvailable.Add( new KeyValuePair<string, long>(project.Proyecto, project.Id));
-            }
-            ViewData["ProjectsAvailable"] = projectsAvailable;
+            var projectsListItems =  _projects.Select( item => new KeyValuePair<string, long>(
+                $"{item.Proyecto} ({item.Clave})",  item.Id
+            )).ToList();
+            ViewData["ProjectsAvailable"] = projectsListItems;
 
             return View();
         }
 
         [Route("/")]
         [HttpPost]
-        public IActionResult Store(NewProjectViewModel newProject){
+        public IActionResult Store( UserRequest userRequest ){
 
-            throw new NotImplementedException();
+            if (!ModelState.IsValid)
+            {
+                // Get list of projects availables and make a multi select list
+                var _projects = this.projectService.GetProjects(null, null)??[];
+                var projectsListItems =  _projects.Select( item => new KeyValuePair<string, long>(
+                    $"{item.Proyecto} ({item.Clave})",  item.Id
+                )).ToList();
+                ViewData["ProjectsAvailable"] = projectsListItems;
 
-            // if (!ModelState.IsValid)
-            // {
-            //     return View("Create", newProject); // Pass the model back to the view
-            // }
+                return View("Create", userRequest );
+            }
 
-            // try{
+            // Store the user
+            try{
+                var userId = this.userService.CreateUser( userRequest, null, out string? message );
+                if( userId == null){
+                    // TODO: Handle error
+                    Console.WriteLine("(-) Error message:" + message);
+                }
+                
 
-            //     await this.projectService.CreateProject( newProject );
+            }catch(SimpleValidationException ex){
+                
+                foreach( var errorProperty in ex.ValidationErrors){
+                    ModelState.AddModelError( errorProperty.Key, errorProperty.Value);
+                }
 
-            // }catch(ValidationException){
-            //     ModelState.AddModelError("Clave", "La clave ya se encuentra almacenada en la base de datos");
-            //     return View("Create", newProject);
-            // }
+                // Get list of projects availables and make a multi select list
+                var _projects = this.projectService.GetProjects(null, null)??[];
+                var projectsListItems =  _projects.Select( item => new KeyValuePair<string, long>(
+                    $"{item.Proyecto} ({item.Clave})",  item.Id
+                )).ToList();
+                ViewData["ProjectsAvailable"] = projectsListItems;
 
-            // return RedirectToAction("Index", "Projects");
+                return View("Create", userRequest);
+            }
+
+            return RedirectToAction("Index", "Users");
 
         }
 
