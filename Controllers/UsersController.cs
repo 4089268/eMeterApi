@@ -1,154 +1,125 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using eMeterApi.Data.Contracts;
-using eMeterApi.Data.Contracts.Models;
-using eMeterApi.Data.Exceptions;
-using eMeterApi.Models;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http.HttpResults;
+using eMeter.Data;
+using eMeter.Models;
+using eMeter.Models.ViewModels.Projects;
+using eMeterApi.Service;
+using eMeterApi.Data.Contracts;
 
-namespace eMeterApi.Controllers
+namespace eMeterSite.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    
+    [Auth]
+    [Route("[controller]")]
+    public class UsersController(ILogger<UsersController> logger, IUserService userService) : Controller
     {
+        private readonly ILogger<UsersController> _logger = logger;
+        private readonly IUserService userService = userService;
 
-        private readonly IUserService userService;
-
-        public UsersController(IUserService userService)
+    
+        public IActionResult Index()
         {
-            this.userService = userService;
-        }
+            var users = Array.Empty<User>();
+            try
+            {
+                var response = userService.GetUsers();
 
-        [HttpGet]
-        public IActionResult GetProjects()
-        {
-            var _users = this.userService.GetUsers();
-            if( _users == null){
-                return Ok( Array.Empty<IUser>() );
-            }
-
-            var results = new List<dynamic>();
-            foreach( var user in _users){
-                results.Add( new {
-                    Id = user.Id,
-                    Email = user.Email,
-                    Name = user.Name,
-                    Company = user.Company
-                });
-            }
-
-            return Ok(results);
-        }
-
-        [HttpPost]
-        public IActionResult CreateUser( [FromBody] UserRequest userRequest)
-        {        
-            if( !ModelState.IsValid ){
-                return BadRequest( ModelState );
-            }
-
-            try{
-                var userId = this.userService.CreateUser( userRequest, null, out string? message );
-                if( userId == null){
-                    return UnprocessableEntity( new {
-                        title = "Cant store the user",
-                        message
-                    } );
+                if( response != null){
+                    users = response.ToArray();
                 }
-
-                return StatusCode( 201,  new {
-                    Title = "User created",
-                    Id = userId
-                });
-
-            }catch(SimpleValidationException validationException){
-                return UnprocessableEntity( new {
-                    title = "Valiations fail",
-                    error= validationException.ValidationErrors
-                } );
             }
-        }
-
-
-        [HttpDelete]
-        [Route("{userId}")]
-        public IActionResult DeleteUser( [FromRoute] long userId )
-        {
-            try{
-                if( this.userService.DisableUser( userId, out string? message) ){
-                    return Ok(
-                        new {
-                            Title = "User has been deleted",
-                            Message = "User has been deleted"
-                        }
-                    );
-                }else{
-                    return UnprocessableEntity(
-                        new {
-                            Title = "Can't deleted the user",
-                            Message = message
-                        }
-                    );
-                }
-            }catch(SimpleValidationException validationException){
-                return UnprocessableEntity(
-                    new {
-                        Title = "Can't deleted the user",
-                        Message = validationException.Message,
-                        Errors = validationException.ValidationErrors
-                    }
-                );
+            catch (System.Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
             }
 
+            return View( users );
+
         }
+        
+        // [Route("create")]
+        // public IActionResult Create(){
+        //     return View();
+        // }
 
+        // [Route("store")]
+        // [HttpPost]
+        // public async Task<IActionResult> Store(NewProjectViewModel newProject){
 
-        [HttpPatch]
-        [Route("{userId}")]
-        public IActionResult UpdateUser( [FromRoute] long userId, [FromBody] UserUpdateRequest userRequest )
-        {
+        //     if (!ModelState.IsValid)
+        //     {
+        //         return View("Create", newProject); // Pass the model back to the view
+        //     }
+
+        //     try{
+
+        //         await this.projectService.CreateProject( newProject );
+
+        //     }catch(ValidationException){
+        //         ModelState.AddModelError("Clave", "La clave ya se encuentra almacenada en la base de datos");
+        //         return View("Create", newProject);
+        //     }
+
+        //     return RedirectToAction("Index", "Projects");
+
+        // }
+
+        // [Route("{projectId}")]
+        // [HttpGet]
+        // public async Task<IActionResult> Edit( [FromRoute] int projectId ){
             
-            if( !ModelState.IsValid ){
-                return BadRequest( ModelState );
-            }
+        //     try{
+        //         var projects = await this.projectService.GetProjects();
+        //         if( projects == null){
+        //             ViewData["ErrorMessage"] = "Erro al obtener el listado de projectos";
+        //             return View("Index", Array.Empty<Project>() );
+        //         }
+                
+        //         var project = projects!.Where( item => item.Id == projectId).FirstOrDefault();
+        //         if(project == null){
+        //             ViewData["ErrorMessage"] = "El proyecto no se encuentra registrado o esta inactivo.";
+        //             return View("Index", projects );
+        //         }
+                
+        //         // Retrive the edit project to edit
+        //         var projectViewModel = new NewProjectViewModel{
+        //             Proyecto = project.Proyecto,
+        //             Clave = project.Clave
+        //         };
+        //         ViewData["ProjectId"] = project.Id;
+        //         return View( projectViewModel );
+
+        //     }catch(Exception err){
+        //         ViewData["ErrorMessage"] = err.Message;
+        //         return View("Index", Array.Empty<Project>()  );
+        //     }
+        // }
+
+        // [Route("{projectId}")]
+        // [HttpPost]
+        // public async Task<IActionResult> Update( NewProjectViewModel newProject, [FromRoute] int projectId ){
             
-            // TODO: has password
+        //     if (!ModelState.IsValid)
+        //     {
+        //         return View("Edit", newProject);
+        //     }
 
-            try{
+        //     try{
+        //         await this.projectService.UpdateProject( projectId, newProject);
+        //     }catch(Exception err){
+        //         this._logger.LogError(err, "Error at udate project");
+        //     }
 
-                if( this.userService.UpdateUser( userId, userRequest , out string? message) ){
-                    return Ok(
-                        new {
-                            Title = "User has been Updated",
-                            Message = "User has been Updated"
-                        }
-                    );
-                }else{
-                    return UnprocessableEntity(
-                        new {
-                            Title = "Can't deleted the user",
-                            Message = message
-                        }
-                    );
-                }
-            }catch(SimpleValidationException validationException){
-                return UnprocessableEntity(
-                    new {
-                        Title = "Can't deleted the user",
-                        Message = validationException.Message,
-                        Errors = validationException.ValidationErrors
-                    }
-                );
-            }
+        //     return RedirectToAction("Index", "Projects");
+        // }
 
-        }
 
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using eMeter.Models;
 using eMeterApi.Data;
 using eMeterApi.Data.Contracts;
 using eMeterApi.Data.Contracts.Models;
@@ -80,7 +81,7 @@ namespace eMeterApi.Service
         /// <param name="message"></param>
         /// <returns></returns>
         /// <exception cref="SimpleValidationException"></exception>
-        public long? CreateUser(IUser user, IDictionary<string, object>? param, out string? message)
+        public long? CreateUser(UserRequest user, IDictionary<string, object>? param, out string? message)
         {
             message = null;
 
@@ -92,7 +93,7 @@ namespace eMeterApi.Service
                 });
             }
 
-            var hashedPassword = DataHasher.HashDataWithKey( user.Password, appKeySettings.AppKey );
+            var hashedPassword = DataHasher.HashDataWithKey( user.Password!, appKeySettings.AppKey );
 
             // Create user entity
             var newUser = new Entities.Usuario(){
@@ -146,10 +147,18 @@ namespace eMeterApi.Service
             }
         }
 
-        public IEnumerable<IUser>? GetUsers()
+        public IEnumerable<User>? GetUsers()
         {
             try{
-                return dbContext.Usuarios.ToList<IUser>();
+                var data = dbContext.Usuarios.ToList();
+
+                return data.Select( item => new User{
+                    Id  = item.Id,
+                    Email = item.Usuario1,
+                    Name = item.Operador??"",
+                    Company = item.Empresa??""
+                }).ToArray();
+
             }catch(Exception err){
                 logger.LogError( err, "Error at get the users");
                 return null;

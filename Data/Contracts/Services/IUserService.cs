@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using eMeter.Models;
 using eMeterApi.Data.Contracts.Models;
 using eMeterApi.Models;
 
@@ -12,9 +13,9 @@ namespace eMeterApi.Data.Contracts
         
         public string? Authenticate(IUserCredentials userCredentials, out string? message );
 
-        public IEnumerable<IUser>? GetUsers();
+        public IEnumerable<User>? GetUsers();
 
-        public long? CreateUser( IUser user, IDictionary<string, object>? param, out string? message );
+        public long? CreateUser( UserRequest user, IDictionary<string, object>? param, out string? message );
 
         public bool DisableUser( long userId, out string? message);
 
