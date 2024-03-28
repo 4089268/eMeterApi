@@ -13,6 +13,9 @@ using eMeterApi.Models;
 using Microsoft.Extensions.Options;
 using eMeterApi.Models.ViewModels.Users;
 using System.Collections.Immutable;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
+using System.Collections.ObjectModel;
 
 namespace eMeterApi.Service
 {
@@ -173,14 +176,31 @@ namespace eMeterApi.Service
         public IEnumerable<User>? GetUsers()
         {
             try{
-                var data = dbContext.Usuarios.ToList();
 
-                return data.Select( item => new User{
-                    Id  = item.Id,
-                    Email = item.Usuario1,
-                    Name = item.Operador??"",
-                    Company = item.Empresa??""
-                }).ToArray();
+                // TODO: Fix this warning
+                var usersRaw = dbContext.Usuarios
+                    .Include( item => item.SysProyectoUsuarios )
+                        .ThenInclude( proj => proj.IdProyectoNavigation ).ToList();
+
+                var users = new List<User>();
+                foreach(var _user in usersRaw){
+                    var user = new User{
+                        Id  = _user.Id,
+                        Email = _user.Usuario1,
+                        Name = _user.Operador??"",
+                        Company = _user.Empresa??"",
+                    };
+
+                    if( _user.SysProyectoUsuarios != null){
+                        user.Projects = _user.SysProyectoUsuarios.Select( item => new Project {
+                            Id = item.IdProyecto,
+                            Proyecto = item.IdProyectoNavigation.Proyecto??""
+                        });
+                    }
+
+                    users.Add( user);
+                }
+                return users;
 
             }catch(Exception err){
                 logger.LogError( err, "Error at get the users");

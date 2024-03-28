@@ -17,5 +17,7 @@ namespace eMeter.Models
         public string Name {get;set;} = "";
         
         public string Company {get;set;} = "";
+
+        public IEnumerable<Project>? Projects {get;set;}
     }
 }

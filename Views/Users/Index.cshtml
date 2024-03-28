@@ -65,7 +65,17 @@
                                             <td>@user.Email</td>
                                             <td>@user.Name</td>
                                             <td>@user.Company</td>
-                                            <td> *No implementado*</td>
+                                            <td>
+                                                <div class="d-flex">
+                                                @if(user.Projects != null){
+                                                    foreach( var project in user.Projects){
+                                                        <span class="badge badge-info mx-1">@project.Proyecto</span>
+                                                    }
+                                                }else{
+                                                    <span class="text-black-50">Sin proyectos</span>
+                                                }
+                                                </div>
+                                            </td>
                                             <td>
                                                 <div class="d-grid gap-2 d-md-block">
                                                     @* <a asp-controller="Users" asp-action="Edit" asp-route-projectId="@user.Id" class="btn btn-primary rounded">Editar</a> *@
