@@ -11,6 +11,7 @@ using eMeterApi.Entities;
 using eMeterApi.Helpers;
 using eMeterApi.Models;
 using Microsoft.Extensions.Options;
+using eMeterApi.Models.ViewModels.Users;
 
 namespace eMeterApi.Service
 {

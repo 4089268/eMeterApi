@@ -10,6 +10,7 @@ using eMeterApi.Data.Exceptions;
 using eMeterApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using eMeterApi.Models.ViewModels.Users;
 
 namespace eMeterApi.API.Controllers
 {

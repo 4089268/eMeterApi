@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using eMeterApi.Data.Contracts.Models;
 
-namespace eMeterApi.Models.ViewModel
+namespace eMeterApi.Models.ViewModels
 {
     public class AuthenticationRequest : IUserCredentials
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using eMeterApi.Data;
 using eMeterApi.Data.Contracts;
 using eMeterApi.Helpers;
-using eMeterApi.Models.ViewModel;
+using eMeterApi.Models.ViewModels;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;

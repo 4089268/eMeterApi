@@ -18,12 +18,13 @@ namespace eMeterSite.Controllers
     
     [Auth]
     [Route("[controller]")]
-    public class UsersController(ILogger<UsersController> logger, IUserService userService) : Controller
+    public class UsersController(ILogger<UsersController> logger, IUserService userService, IProjectService projectService) : Controller
     {
         private readonly ILogger<UsersController> _logger = logger;
         private readonly IUserService userService = userService;
+        private readonly IProjectService projectService = projectService;
 
-    
+        [HttpGet]
         public IActionResult Index()
         {
             var users = Array.Empty<User>();
@@ -44,32 +45,45 @@ namespace eMeterSite.Controllers
 
         }
         
-        // [Route("create")]
-        // public IActionResult Create(){
-        //     return View();
-        // }
+        [Route("create")]
+        [HttpGet]
+        public IActionResult Create(){
 
-        // [Route("store")]
-        // [HttpPost]
-        // public async Task<IActionResult> Store(NewProjectViewModel newProject){
+            // TODO: Get list of projects availables
+            var _projects = this.projectService.GetProjects(null, null)??[];
 
-        //     if (!ModelState.IsValid)
-        //     {
-        //         return View("Create", newProject); // Pass the model back to the view
-        //     }
+            var projectsAvailable = new List<KeyValuePair<string, long>>();
+            foreach( var project in _projects){
+                projectsAvailable.Add( new KeyValuePair<string, long>(project.Proyecto, project.Id));
+            }
+            ViewData["ProjectsAvailable"] = projectsAvailable;
 
-        //     try{
+            return View();
+        }
 
-        //         await this.projectService.CreateProject( newProject );
+        [Route("/")]
+        [HttpPost]
+        public IActionResult Store(NewProjectViewModel newProject){
 
-        //     }catch(ValidationException){
-        //         ModelState.AddModelError("Clave", "La clave ya se encuentra almacenada en la base de datos");
-        //         return View("Create", newProject);
-        //     }
+            throw new NotImplementedException();
 
-        //     return RedirectToAction("Index", "Projects");
+            // if (!ModelState.IsValid)
+            // {
+            //     return View("Create", newProject); // Pass the model back to the view
+            // }
 
-        // }
+            // try{
+
+            //     await this.projectService.CreateProject( newProject );
+
+            // }catch(ValidationException){
+            //     ModelState.AddModelError("Clave", "La clave ya se encuentra almacenada en la base de datos");
+            //     return View("Create", newProject);
+            // }
+
+            // return RedirectToAction("Index", "Projects");
+
+        }
 
         // [Route("{projectId}")]
         // [HttpGet]
