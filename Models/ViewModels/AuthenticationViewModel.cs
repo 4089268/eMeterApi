@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
@@ -11,17 +12,16 @@ namespace eMeter.Models.ViewModels
     public class AuthenticationViewModel : IUserCredentials
     {
 
-        [Required]
-        [DataType(DataType.EmailAddress)]
+        [Required (ErrorMessage = "El correo electrónico es requerido")]
+        [DataType(DataType.EmailAddress, ErrorMessage = "Introduzca un correo electrónico válido")]
+        [DisplayName("Correo Electrónico")]
         public string? Email {get; set;}
         
-        [Required]
+        [Required (ErrorMessage = "La contraseña es requerida")]
         [DataType(DataType.Password)]
+        [DisplayName("Contraseña")]
         public string? Password {get; set;}
 
-        [Required]
-        [DataType(DataType.Password)]
         public string? MessageError {get; set;}
-        
     }
 }

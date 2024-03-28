@@ -30,6 +30,12 @@ namespace eMeterApi.Controllers
         [HttpPost]
         public IActionResult Login( AuthenticationViewModel authenticationViewModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return View("Index", authenticationViewModel );
+            }
+
+
 
             var token = userService.Authenticate( authenticationViewModel, out string? message );
 

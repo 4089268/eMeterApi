@@ -9,17 +9,21 @@
     <div class="card ">
         <div class="card-header text-center">
             <a href="../index.html"><img class="logo-img" src="/img/logo.png" alt="logo" style="width:100%;"></a>
-            <span class="splash-description mt-4">Please enter your user information.</span>
+            <span class="splash-description mt-4">Introduzca sus datos de usuario.</span>
         </div>
         <div class="card-body">
             @using( Html.BeginForm("Login", "Authentication", FormMethod.Post )){
                 <div class="form-group">
-                    <input class="form-control form-control-lg" asp-for="Email" autocomplete="off">
+                    <label asp-for="Email"></label>
+                    <input class="form-control form-control-lg" asp-for="Email" autocomplete="off" placeholder="user@email.com">
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <input class="form-control form-control-lg" asp-for="Password"  type="password" placeholder="Password">
+                    <label asp-for="Password"></label>
+                    <input class="form-control form-control-lg" asp-for="Password"  type="password" placeholder="password">
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
-                <button type="submit" class="btn btn-primary btn-lg btn-block">Sign in</button>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Iniciar Sesion</button>
             }
         </div>
     </div>
