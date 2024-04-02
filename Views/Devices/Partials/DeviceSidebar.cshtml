@@ -30,7 +30,7 @@
             <select class="form-control" name="PI">
                 <option selected value="">Todos</option>
                 @foreach( var project in (IEnumerable<Project>) ViewBag.Projects ){
-                    <option value="@project.Id">@project.Proyecto</option>
+                    <option value="@project.Id">@project.Proyecto (@project.Clave)</option>
                 }
             </select>
         </div>
@@ -43,7 +43,7 @@
             @foreach( var project in (IEnumerable<Project>) ViewBag.Projects ){
             <div class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input" id="@project.Id" value="">
-                <label class="custom-control-label" for="customCheck10">@project.Proyecto</label>
+                <label class="custom-control-label" for="customCheck10">@project.Proyecto (@project.Clave)</label>
             </div>
             }
         </div>

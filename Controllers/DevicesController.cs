@@ -10,6 +10,9 @@ using eMeter.Data;
 using eMeter.Models;
 using eMeterApi.Data;
 using eMeter.Service;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
+using eMeterApi.Service;
+using eMeterApi.Data.Contracts;
 
 namespace eMeterSite.Controllers
 {
@@ -19,31 +22,40 @@ namespace eMeterSite.Controllers
     public class DevicesController : Controller
     {
         private readonly ILogger<DevicesController> _logger;
-        private readonly EMeterContext eMeterContext;
         private readonly DeviceService deviceService;
-
-        public DevicesController(ILogger<DevicesController> logger, EMeterContext eMeterContext, DeviceService deviceService)
+        private readonly IProjectService projectService;
+        
+        public DevicesController(ILogger<DevicesController> logger, DeviceService deviceService, IProjectService projectService)
         {
             _logger = logger;
-            this.eMeterContext = eMeterContext;
             this.deviceService = deviceService;
+            this.projectService = projectService;
         }
 
         public IActionResult Index([FromQuery] int page = 0, [FromQuery] int chunk = 25, [FromQuery] int PI = 0, [FromQuery] string? SB = null, [FromQuery] string? SV = null ) 
         {
+            // Get user id
+            long userId = 0;
+            try{
+                var userIdClaim = HttpContext.User.Claims.Where( item => item.Type == "userId").FirstOrDefault()??throw new Exception("User id not found in the user Claims");
+                userId = Convert.ToInt64(userIdClaim!.Value);
+            }catch(Exception err){
+                this._logger.LogError(err, "Can't obtain the user id at DevicesController.Index");
+            }
 
-            var devices = this.deviceService.GetDevices(out int totalItems, chunk, page );
+            // Get projects of the user
+            var projects = this.projectService.GetProjects(userId, null)??[];
+            var projectsGroupIds = projects.Select( item => item.Clave).ToArray();
+
+            ViewData["Projects"] =  projects;
+            
+            var devices = this.deviceService.GetDevices(out int totalItems, chunk, page, projectsGroupIds );
 
             // Process data
             ViewData["ChunkSize"] = chunk;
             ViewData["CurrentPage"] = page;
             ViewData["TotalItems"] = totalItems;
-
-            // TODO: Get catalogs projects
-            // var _projects = await appService.GetProjects();
-            // if( _projects != null){
-            //     ViewData["Projects"] = _projects!;
-            // }
+            
 
             return View( devices );
         }

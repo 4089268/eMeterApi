@@ -35,19 +35,22 @@
 
                         <p class="mb-0">
                             <i class="fa fa-map-marker-alt mr-2  text-primary"></i>
-                            <span class="m-l-0">Ubicacion: Ciudad, Estado </span>
+                            <span class="m-l-0">Ubicacion: Ciudad, Estado (Sample) </span>
                         </p>
 
                         <div class="mt-3">
-                            <a href="#" class="mr-1 badge badge-light">Nombre projecto 1</a>
-                            <a href="#" class="mr-1 badge badge-light">Nombre projecto 2</a>
+                        @if(!string.IsNullOrEmpty(Model.GroupId)){
+                            <a href="#" class="mr-1 px-3 badge badge-brand text-black-50"> @Model.GroupId</a>
+                        }else{
+                            <a href="#" class="mr-1 px-3 badge badge-danger">No definido</a>
+                        }
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12">
                 <div class="float-xl-right float-none mt-xl-0 mt-4">
-                    <a asp-action="Show" asp-controller="Devices" asp-route-id="@Model.MeterAddress" class="btn btn-primary">Mostrar</a>
+                    <a asp-action="Show" asp-controller="Devices" asp-route-id="@Model.MeterAddress" class="btn btn-primary rounded">Mostrar</a>
                 </div>
             </div>
         </div>
