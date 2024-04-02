@@ -16,6 +16,8 @@ public partial class EMeterContext : DbContext
     {
     }
 
+    public virtual DbSet<Device> Devices { get; set; }
+
     public virtual DbSet<MeterDataTable> MeterDataTables { get; set; }
 
     public virtual DbSet<SysProyecto> SysProyectos { get; set; }
@@ -29,11 +31,31 @@ public partial class EMeterContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Device>(entity =>
+        {
+            entity.HasKey(e => e.MeterAddress).HasName("pk_device_address");
+
+            entity.ToTable("Devices", "Global");
+
+            entity.Property(e => e.MeterAddress).HasMaxLength(255);
+            entity.Property(e => e.Battery).HasMaxLength(255);
+            entity.Property(e => e.CfUnit).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.DevDate).HasMaxLength(255);
+            entity.Property(e => e.DevTime).HasMaxLength(255);
+            entity.Property(e => e.FlowRateUnit).HasMaxLength(255);
+            entity.Property(e => e.GroupId).IsUnicode(false);
+            entity.Property(e => e.ReverseFlow).HasMaxLength(255);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.Valve).HasMaxLength(255);
+            entity.Property(e => e.WaterTemp).HasMaxLength(255);
+        });
+
         modelBuilder.Entity<MeterDataTable>(entity =>
         {
             entity
                 .HasNoKey()
-                .ToTable("MeterDataTable");
+                .ToTable("MeterDataTable", tb => tb.HasTrigger("MeterDataTableInsert"));
 
             entity.Property(e => e.Battery).HasMaxLength(255);
             entity.Property(e => e.Battery1).HasMaxLength(255);
@@ -76,13 +98,13 @@ public partial class EMeterContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("clave");
+            entity.Property(e => e.DeletedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("deleted_at");
             entity.Property(e => e.Proyecto)
                 .HasMaxLength(80)
                 .IsUnicode(false)
                 .HasColumnName("proyecto");
-            entity.Property( e => e.DeletedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("deleted_at");
         });
 
         modelBuilder.Entity<SysProyectoUsuario>(entity =>
