@@ -74,5 +74,31 @@ namespace eMeter.Service
             };
         }
 
+        public IEnumerable<KeyValuePair<string, int>> GetMeasurementChart( string deviceAddress ){
+
+            // Create list of the last 15 days
+            var currentData = DateTime.Now;
+            List<DateTime> lastDays = new List<DateTime>();
+            for( int i = 0; i<15; i++){
+                DateTime previousDate = currentData.AddDays(-i);
+                lastDays.Add( previousDate );
+            }
+            lastDays = lastDays.OrderBy(item => item.Ticks).ToList();
+
+            // Get data by day
+            List<KeyValuePair<string, int>> charValues = new List<KeyValuePair<string, int>>();
+            foreach( var date in lastDays){
+                var total = eMeterContext.MeterDataTables
+                    .Where( item => item.MeterAddress == deviceAddress)
+                    .Where( item => item.RegistrationDate!.Value.Date == date.Date )
+                    .Count();
+                
+                charValues.Add( new KeyValuePair<string, int>( date.ToString("MMM dd").ToUpper(), total ));
+            }
+
+            return charValues;
+
+        }
     }
+
 }

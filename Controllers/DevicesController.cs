@@ -55,7 +55,6 @@ namespace eMeterSite.Controllers
             ViewData["ChunkSize"] = chunk;
             ViewData["CurrentPage"] = page;
             ViewData["TotalItems"] = totalItems;
-            
 
             return View( devices );
         }
@@ -73,6 +72,10 @@ namespace eMeterSite.Controllers
             }
 
             ViewData["Device"] = deviceDetails!;
+
+            // Get char values
+            var chartData = this.deviceService.GetMeasurementChart(deviceAddress);
+            ViewData["ChartData"] = chartData;
             
             return View();
         }
