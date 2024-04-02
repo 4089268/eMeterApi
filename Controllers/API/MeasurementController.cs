@@ -5,6 +5,8 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using eMeter.Models;
+using eMeter.Service;
 using eMeterApi.Data;
 using eMeterApi.Entities;
 using eMeterApi.Models;
@@ -21,11 +23,13 @@ namespace eMeterApi.Controllers.API
     {
 
         private readonly ILogger<MeasurementController> logger;
-        private readonly EMeterContext eMeterContext;
+        private readonly MeasurementService measurementService;
+        private readonly DeviceService deviceService;
 
-        public MeasurementController( ILogger<MeasurementController> logger, EMeterContext eMeterContext){
+        public MeasurementController( ILogger<MeasurementController> logger, MeasurementService measurementService, DeviceService deviceService){
             this.logger = logger;
-            this.eMeterContext = eMeterContext;
+            this.measurementService = measurementService;
+            this.deviceService = deviceService;
         }
         
 
@@ -37,40 +41,21 @@ namespace eMeterApi.Controllers.API
         [HttpGet]
         public IActionResult GetMeasurement( [FromQuery] int chunk = 25, [FromQuery] int page = 0, [FromQuery] string? deviceAddress = "", [FromQuery] string? from = "", [FromQuery] string? to = "" )
         {
-            
-            var query = eMeterContext.MeterDataTables.OrderByDescending( e => e.RegistrationDate).AsQueryable();
-            if( !string.IsNullOrEmpty(deviceAddress) ){
-                query = query.Where( item => item.MeterAddress == deviceAddress);
+
+            // Validate dates
+            if( !DateTime.TryParse(from, out var _from) || !DateTime.TryParse(to, out var _to)){
+                return BadRequest( new {
+                    title = "Dates are not valid",
+                    message = "Invalid date format or values provided for 'from' and 'to'."
+                });
             }
 
-            if( !string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to) ){
-                if(DateTime.TryParse(from, out var _from) && DateTime.TryParse(to, out var _to)){
-                    query = query.Where(item => _from.Date <= item.RegistrationDate!.Value.Date && item.RegistrationDate!.Value.Date <= _to.Date);
+            // Get data
+            var measurements = this.measurementService.GetMeasurement( _from, _to, out int totalItems, chunk, page, deviceAddress);
 
-                }
-                else {
-                    return BadRequest( new {
-                        title = "Dates are not valid",
-                        message = "Invalid date format or values provided for 'from' and 'to'."
-                    });
-                }
-            }
-
-
-            var totalItems = query.Count();
-
-            IEnumerable<MeterDataTable> data = Array.Empty<MeterDataTable>();
-            if( chunk == 0){
-                data = query.ToList();
-            }else{
-                data = query
-                    .Skip( chunk * page)
-                    .Take( chunk)
-                    .ToList();
-            }
-
-            return Ok( new EnumerableResponse<MeterDataTable>(){
-                Data = data,
+            // Return data
+            return Ok( new EnumerableResponse<Measurement>(){
+                Data = measurements,
                 ChunkSize = chunk,
                 Page=page,
                 TotalItems = totalItems
@@ -81,94 +66,21 @@ namespace eMeterApi.Controllers.API
         [Route("Devices")]
         public IActionResult GetDevices( [FromQuery] int chunk = 25, [FromQuery] int page = 0 )
         {
-            
-            var devicesDataQuery = eMeterContext.MeterDataTables
-                .Where( item => item.MeterAddress != null)
-                .OrderByDescending( item => item.RegistrationDate)
-                .GroupBy( item => item.MeterAddress);
-
-            var totalItems = devicesDataQuery.Count();
-
-            var devicesData = devicesDataQuery
-                .Select( g =>  new { DeviceAddress = g.Key, Info = g.FirstOrDefault(), TotalRecords = g.Count() })
-                .Skip( chunk * page)
-                .Take( chunk )
-                .ToList();
-            
-            var devicesResponse = new List<Device>();
-            foreach( var deviceGroup in devicesData)
-            {
-                if(deviceGroup.Info != null){
-                    var deviceInfo = new Device( deviceGroup.DeviceAddress! )
-                    {
-                        CummulativeFlow = deviceGroup.Info.CummulativeFlow,
-                        DevDate = deviceGroup.Info.DevDate!,
-                        DevTime = deviceGroup.Info.DevTime!,
-                        Valve = deviceGroup.Info.Valve!.ToUpper(),
-                        Battery = deviceGroup.Info.Battery!.ToUpper(),
-                        LastUpdate = deviceGroup.Info.RegistrationDate!.Value,
-                        TotalRecords = deviceGroup.TotalRecords
-                    };
-                    // TODO: Convert meterDataTable.CfUnit
-                    // deviceInfo.CfUnit = meterDataTable.CfUnit;
-                    devicesResponse.Add( deviceInfo);
-                }
-            }
-
+            var devices = this.deviceService.GetDevices( out int totalItems, chunk, page, null);
             return Ok( new EnumerableResponse<Device>(){
-                Data = devicesResponse,
+                Data = devices,
                 ChunkSize = chunk,
                 Page = page,
                 TotalItems = totalItems
             });
-            
         }
 
         [HttpGet]
         [Route("Devices/{deviceAddress}")]
-        public IActionResult GetDeviceInfo( [FromRoute] string deviceAddress )
+        public ActionResult<DeviceDetails> GetDeviceInfo( [FromRoute] string deviceAddress )
         {
-            
-            var deviceInfoRaw = eMeterContext.MeterDataTables
-                .OrderByDescending( item => item.RegistrationDate)
-                .Where( item => item.MeterAddress == deviceAddress )
-                .FirstOrDefault();
-
-            if( deviceInfoRaw == null){
-                return BadRequest( new{
-                    message = $"Device address {deviceAddress} not found"
-                });
-            }
-
-            var measurementsQuery = eMeterContext.MeterDataTables
-                .OrderByDescending( item => item.RegistrationDate)
-                .Where( item => item.MeterAddress == deviceAddress );
-            
-            var totalItems = measurementsQuery.Count();
-
-            var measurements = measurementsQuery
-                .Take(25)
-                .ToImmutableList();
-            
-            var deviceInfo = new Device( deviceInfoRaw!.MeterAddress! )
-            {
-                CummulativeFlow = deviceInfoRaw.CummulativeFlow,
-                DevDate = deviceInfoRaw.DevDate!,
-                DevTime = deviceInfoRaw.DevTime!,
-                Valve = deviceInfoRaw.Valve!.ToUpper(),
-                Battery = deviceInfoRaw.Battery!.ToUpper(),
-                LastUpdate = deviceInfoRaw.RegistrationDate!.Value,
-                TotalRecords = totalItems
-            };
-
-            return Ok( new {
-                DeviceAddress = deviceAddress,
-                Device = deviceInfo,
-                Measurement = measurements
-            });
-            
+            var deviceInfo = this.deviceService.GetDeviceInfo( deviceAddress );
+            return Ok(deviceInfo);
         }
-
-
     }
 }

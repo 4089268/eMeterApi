@@ -1,5 +1,6 @@
+@using eMeterApi.Entities
 @using eMeterApi.Models
-@model IEnumerable<eMeterApi.Models.Device>?
+@model IEnumerable<Device>?
 
 @{
     var _totalPages = (int) Math.Truncate( (double) ViewBag.TotalItems / ViewBag.ChunkSize);
