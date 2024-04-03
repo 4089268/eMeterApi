@@ -23,7 +23,7 @@ namespace eMeter.Service
             this.logger = logger;
         }
 
-        public IEnumerable<Device> GetDevices(out int totalItems, int chunk = 25, int page = 0, IEnumerable<string>? groupsId = null)
+        public IEnumerable<Device> GetDevices(out int totalItems, int chunk = 25, int page = 0, IEnumerable<string>? groupsId = null, IEnumerable<string>? batteryStatus = null, IEnumerable<string>? valveStatus = null, string? search = null )
         {
 
             var devicesQuery = eMeterContext.Devices.AsQueryable();
@@ -35,6 +35,28 @@ namespace eMeter.Service
                         groupId.ToLower()
                     ).Contains(device.GroupId.ToLower())
                 );
+            }
+
+            if(batteryStatus != null)
+            {
+                devicesQuery = devicesQuery.Where( device => 
+                    batteryStatus.Select(item => 
+                        item.ToLower()
+                    ).Contains(device.Battery.ToLower())
+                );
+            }
+
+            if(valveStatus != null)
+            {
+                devicesQuery = devicesQuery.Where( device => 
+                    valveStatus.Select(item => 
+                        item.ToLower()
+                    ).Contains(device.Valve.ToLower())
+                );
+            }
+            
+            if( !String.IsNullOrEmpty(search)){
+                devicesQuery = devicesQuery.Where( device => device.MeterAddress.Contains(search));
             }
 
             totalItems = devicesQuery.Count();

@@ -1,9 +1,10 @@
 @using eMeterApi.Entities
 @using eMeterApi.Models
-@model IEnumerable<Device>?
+@using eMeterApi.Models.ViewModels.Devices
+@model DevicesIndexViewModel
 
 @{
-    var _totalPages = (int) Math.Truncate( (double) ViewBag.TotalItems / ViewBag.ChunkSize);
+    var _totalPages = (int) Math.Truncate( (double) ViewBag.TotalItems / Model.Filter.Chunk);
 }
 
 <div class="container-fluid dashboard-content">
@@ -26,22 +27,7 @@
     </div>
     <!-- end pageheader -->
     
-    <!-- content -->
-    <div class="row">
-        <!-- search bar  -->
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-            <div class="card">
-                <div class="card-body">
-                    <form>
-                        <input class="form-control form-control-lg" type="search" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-primary search-btn" type="submit">Search</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <!-- end search bar  -->
-    </div>
-
+    
     <!-- Paginator Top  -->
     <div class="row">
         <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12 col-12">
@@ -56,7 +42,7 @@
                     @for(int i = 0; i <= _totalPages; i++){
                         var _customRoute = $"/Devices?page={i}";
                         var _label = (i+1).ToString();
-                        <li class='page-item @( (i) == (int)ViewBag.CurrentPage?"active":"") '>
+                        <li class='page-item @( (i) == (int)Model.Filter.Page?"active":"") '>
                             <a class="page-link" href="@_customRoute">@_label</a>
                         </li>
                     }
@@ -75,31 +61,25 @@
 
     <!-- Details -->
     <div class="row">
-        @{
-            if( @Model != null){
-                <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12 col-12">
-                    @if(@Model.Count() > 0){
-                        foreach (Device device in @Model!)
-                        {
-                            @Html.Partial("./Partials/Card", device )
-                        }
-                    }else{
-                        <div class="alert alert-primary" role="alert">
-                            <h4 class="alert-heading">No hay datos disponibles</h4>
-                            <p>No hay registros de los medidores asignados a este usuario o no tiene asignado ningún medidor, espere o contacte con el administrador.</p>
-                        </div>
-                    }
-                </div>
+
+        <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12 col-12">
+            @if(@Model.Devices.Count() > 0){
+                foreach (Device device in @Model.Devices)
+                {
+                    @Html.Partial("./Partials/Card", device )
+                }
             }else{
-                <div class="alert alert-danger" role="alert">
-                    Hubo un error al obtener los datos, consulte con el administrador o espere e intente de nuevo.
+                <div class="alert alert-primary" role="alert">
+                    <h4 class="alert-heading">No hay datos disponibles</h4>
+                    <p>No hay registros de los medidores asignados a este usuario o no tiene asignado ningún medidor, espere o contacte con el administrador.</p>
                 </div>
             }
-        }
+        </div>
 
-        <!-- influencer sidebar  -->
-        @Html.Partial("./Partials/DeviceSidebar")
-        <!-- end influencer sidebar  -->
+        
+        <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-12">
+            @Html.Partial("./Partials/DeviceSidebar", @Model.Filter )
+        </div>
     </div>
     <!-- End Details -->
 
@@ -118,7 +98,7 @@
                      @for(int i = 0; i <= _totalPages; i++){
                         var _customRoute = $"/Devices?page={i}";
                         var _label = (i+1).ToString();
-                        <li class='page-item @( (i) == (int)ViewBag.CurrentPage?"active":"") '>
+                        <li class='page-item @( (i) == (int)Model.Filter.Page?"active":"") '>
                             <a class="page-link" href="@_customRoute">@_label</a>
                         </li>
                     }

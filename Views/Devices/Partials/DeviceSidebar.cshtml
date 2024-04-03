@@ -1,58 +1,41 @@
-@using  eMeter.Models
+@using eMeterApi.Models
+@using eMeterApi.Models.ViewModels.Devices
+@model eMeterApi.Models.ViewModels.Devices.DeviceIndexFilterViewModel
 
-<div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-12">
-    <div class="card sticky-top">
-    @using( Html.BeginForm("Index", "Devices", FormMethod.Get)){
+<div class="card sticky-top">
+@using( Html.BeginForm("Index", "Devices", FormMethod.Get)){
     
-        <div class="card-body border-top">
-            <h3 class="font-16">Estatus Valvula</h3>
-            <select class="form-control" name="SV">
-                <option selected value="">Todos</option>
-                <option value="closed">Closed</option>
-                <option value="open">Open</option>
-                <option value="otro">Other</option>
-            </select>
-        </div>
+    <div class="card-body border-top">
 
-        <div class="card-body border-top">
-            <h3 class="font-16">Estatus Bateria</h3>
-            <select class="form-control" name="SB">
-                <option selected value="">Todos</option>
-                <option value="low battery">Low Battery</option>
-                <option value="normal">Normal</option>
-                <option value="otro">Other</option>
-            </select>
-        </div>
-
-        @if(ViewBag.Projects != null){
-        <div class="card-body border-top">
-            <h3 class="font-16">Projecto</h3>
-            <select class="form-control" name="PI">
-                <option selected value="">Todos</option>
-                @foreach( var project in (IEnumerable<Project>) ViewBag.Projects ){
-                    <option value="@project.Id">@project.Proyecto (@project.Clave)</option>
-                }
-            </select>
-        </div>
-        }
-
-        @if(ViewBag.Projects != null){
-        <div class="card-body border-top">
-            <h3 class="font-16">Projectos</h3>
-
-            @foreach( var project in (IEnumerable<Project>) ViewBag.Projects ){
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="@project.Id" value="">
-                <label class="custom-control-label" for="customCheck10">@project.Proyecto (@project.Clave)</label>
+        <div class="input-group input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 56 56">
+                        <path fill="currentColor" d="M23.957 41.77a18.02 18.02 0 0 0 10.477-3.376l11.109 11.11a2.658 2.658 0 0 0 1.898.773c1.524 0 2.625-1.172 2.625-2.672c0-.703-.234-1.359-.75-1.874L38.277 34.668c2.32-3.047 3.703-6.82 3.703-10.922c0-9.914-8.109-18.023-18.023-18.023c-9.937 0-18.023 8.109-18.023 18.023S14.02 41.77 23.957 41.77m0-3.891c-7.758 0-14.133-6.398-14.133-14.133c0-7.734 6.375-14.133 14.133-14.133c7.734 0 14.133 6.399 14.133 14.133c0 7.735-6.399 14.133-14.133 14.133"/>
+                    </svg>
+                </span>
             </div>
-            }
-        </div>
-        }
-        
-        <div class="card-body border-top">
-            <input type="submit" class="btn btn-secondary btn-lg btn-block" />
+            <input asp-for="S" type="search" placeholder="Buscar" class="form-control">
         </div>
 
-    }
+        <div class="form-group">
+            <label asp-for="PK" class="col-form-label"></label>
+            <select asp-for="PK" asp-items="ViewBag.Projects" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="VS" class="col-form-label"></label>
+            <select asp-for="VS" asp-items="ViewBag.ValveStatuses" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="BS" class="col-form-label"></label>
+            <select asp-for="BS" asp-items="ViewBag.BatteryStatuses" class="form-control"></select>
+        </div>
     </div>
+    
+    <div class="card-body border-top">
+        <input type="submit" class="btn btn-secondary btn-lg btn-block" />
+    </div>
+}
 </div>
