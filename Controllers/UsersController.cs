@@ -106,36 +106,40 @@ namespace eMeterSite.Controllers
 
         }
 
-        // [Route("{projectId}")]
-        // [HttpGet]
-        // public async Task<IActionResult> Edit( [FromRoute] int projectId ){
-            
-        //     try{
-        //         var projects = await this.projectService.GetProjects();
-        //         if( projects == null){
-        //             ViewData["ErrorMessage"] = "Erro al obtener el listado de projectos";
-        //             return View("Index", Array.Empty<Project>() );
-        //         }
+        [Route("{userId}")]
+        [HttpGet]
+        public IActionResult Edit( [FromRoute] int userId ){
+            try{
+                 // Get list of projects availables and make a multi select list
+                var _projects = this.projectService.GetProjects(null, null)??[];
+                var projectsListItems =  _projects.Select( item => new KeyValuePair<string, long>(
+                    $"{item.Proyecto} ({item.Clave})",  item.Id
+                )).ToList();
                 
-        //         var project = projects!.Where( item => item.Id == projectId).FirstOrDefault();
-        //         if(project == null){
-        //             ViewData["ErrorMessage"] = "El proyecto no se encuentra registrado o esta inactivo.";
-        //             return View("Index", projects );
-        //         }
+                // TODO: Make method to search user by id
+                var user = this.userService.GetUsers()!.Where(item => item.Id ==  userId).FirstOrDefault();
+                if(user == null){
+                    ViewData["ErrorMessage"] = "Erro al obtener los datos del usuario";
+                    return View("Index", Array.Empty<Project>() );
+                }
                 
-        //         // Retrive the edit project to edit
-        //         var projectViewModel = new NewProjectViewModel{
-        //             Proyecto = project.Proyecto,
-        //             Clave = project.Clave
-        //         };
-        //         ViewData["ProjectId"] = project.Id;
-        //         return View( projectViewModel );
+                // Retrive the edit project to edit
+                var userRequest = new UserRequest{
+                    Email = user.Email,
+                    Name = user.Name,
+                    Company = user.Company,
+                    ProjectsId= (user.Projects??[]).Select( item => item.Id).ToList()
+                };
 
-        //     }catch(Exception err){
-        //         ViewData["ErrorMessage"] = err.Message;
-        //         return View("Index", Array.Empty<Project>()  );
-        //     }
-        // }
+                ViewData["ProjectsAvailable"] = projectsListItems;
+
+                return View( userRequest );
+
+            }catch(Exception err){
+                ViewData["ErrorMessage"] = err.Message;
+                return View("Index", Array.Empty<Project>()  );
+            }
+        }
 
         // [Route("{projectId}")]
         // [HttpPost]

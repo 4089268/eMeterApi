@@ -1,8 +1,10 @@
-﻿@model eMeter.Models.ViewModels.Projects.NewProjectViewModel
+﻿@model eMeterApi.Models.ViewModels.Users.UserRequest
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "eMeter - Nuevo Usuario";
 }
-
+@section Styles {
+    <link rel="stylesheet" href="/assets/vendor/multi-select/css/multi-select.css">
+}
 <div class="dashboard-ecommerce">
     <div class="container-fluid dashboard-content ">
         
@@ -14,8 +16,8 @@
                     <div class="page-breadcrumb">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="/Projects" class="breadcrumb-link">Projects</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Nuevo Proyecto</li>
+                                <li class="breadcrumb-item"><a href="/Users" class="breadcrumb-link">Users</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">New User</li>
                             </ol>
                         </nav>
                     </div>
@@ -33,31 +35,59 @@
         <div class="container">
             <div class="row mx-auto"  style="max-width: 700px;">
                 <div class="col-12 mb-2">
-                    <a class="rounded d-flex items-center" asp-controller="Projects" asp-action="Index">
+                    <a class="rounded d-flex items-center" asp-controller="Users" asp-action="Index">
                         <svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="m6.8 13l2.9 2.9q.275.275.275.7t-.275.7q-.275.275-.7.275t-.7-.275l-4.6-4.6q-.15-.15-.213-.325T3.426 12q0-.2.063-.375T3.7 11.3l4.6-4.6q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7L6.8 11H20q.425 0 .713.288T21 12q0 .425-.288.713T20 13z"/></svg>
                         Regresar
                     </a>
                 </div>
 
                 <div class="col-12">
-                    <form method="Post" asp-controller="Projects" asp-action="Update" asp-route-projectId="@ViewBag.ProjectId">
+                    <form asp-controller="Users" asp-action="Store" method="Post">
                     <div class="card">
-                        <h2 class="card-header font-24">Nuevo Proyecto</h2>
+                        <h2 class="card-header font-24">Editar Usuario</h2>
                         <div class="card-body">
                             <div class="form-group">
-                                <label asp-for="Proyecto" class="col-form-label"></label>
-                                <input asp-for="Proyecto" class="form-control">
-                                <span asp-validation-for="Proyecto" class="text-danger"></span>
+                                <label asp-for="Email" class="col-form-label"></label>
+                                <input asp-for="Email" class="form-control">
+                                <span asp-validation-for="Email" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="Clave" class="col-form-label"></label>
-                                <input asp-for="Clave" class="form-control">
-                                <span asp-validation-for="Clave" class="text-danger"></span>
+                                <label asp-for="Name" class="col-form-label"></label>
+                                <input asp-for="Name" class="form-control">
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Company" class="col-form-label"></label>
+                                <input asp-for="Company" class="form-control">
+                                <span asp-validation-for="Company" class="text-danger"></span>
+                            </div>
+
+                            @* <div class="form-group">
+                                <label asp-for="Password" class="col-form-label"></label>
+                                <input asp-for="Password" class="form-control">
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="PasswordConfirm" class="col-form-label"></label>
+                                <input asp-for="PasswordConfirm" class="form-control">
+                                <span asp-validation-for="PasswordConfirm" class="text-danger"></span>
+                            </div> *@
+
+                            <div class="form-group">
+                                <label asp-for="ProjectsId" class="col-form-label"></label>
+                                <div class="w-100 d-flex mt-2">
+                                    <div class="w-50 text-center text-black-50">Proyectos Disponibles</div>
+                                    <div class="w-50 text-center text-black-50">Proyectos Seleccionados</div>
+                                </div>
+                                @Html.ListBoxFor( x => x.ProjectsId, new MultiSelectList( ViewBag.ProjectsAvailable, "Value", "Key" ), new {@Id="prjectslst"} )
                             </div>
                         </div>
+
                         <div class="card-footer bg-white">
                             <div class="form-group">
-                                <button class="btn btn-primary rounded d-flex items-center px-4 mx-auto" type="submit">
+                                <button class="btn btn-primary rounded d-flex items-center px-4 mx-auto" type="button" disabled>
                                     <svg class="mr-2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
                                         <path fill="currentColor" d="M21 7v12q0 .825-.587 1.413T19 21H5q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h12zm-9 11q1.25 0 2.125-.875T15 15q0-1.25-.875-2.125T12 12q-1.25 0-2.125.875T9 15q0 1.25.875 2.125T12 18m-6-8h9V6H6z"/>
                                     </svg>
@@ -76,8 +106,10 @@
 
 
 @section Scripts {
-    <script src="/assets/vendor/charts/c3charts/c3.min.js"></script>
-    <script src="/assets/vendor/charts/c3charts/d3-5.4.0.min.js"></script>
-    <script src="/assets/vendor/charts/c3charts/C3chartjs.js"></script>
-    <script src="/assets/libs/js/dashboard-ecommerce.js"></script>
+    <script src="/assets/vendor/multi-select/js/jquery.multi-select.js"></script>
+    <script>
+        $(document).ready(()=>{
+            $('#prjectslst').multiSelect();
+        });
+    </script>
 }z
