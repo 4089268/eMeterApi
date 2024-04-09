@@ -43,6 +43,9 @@ public partial class EMeterContext : DbContext
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.DevDate).HasMaxLength(255);
             entity.Property(e => e.DevTime).HasMaxLength(255);
+            entity.Property(e => e.DeviceId)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("((0.))");
             entity.Property(e => e.FlowRateUnit).HasMaxLength(255);
             entity.Property(e => e.GroupId).IsUnicode(false);
             entity.Property(e => e.ReverseFlow).HasMaxLength(255);
@@ -66,6 +69,9 @@ public partial class EMeterContext : DbContext
             entity.Property(e => e.DataId).HasMaxLength(255);
             entity.Property(e => e.DevDate).HasMaxLength(255);
             entity.Property(e => e.DevTime).HasMaxLength(255);
+            entity.Property(e => e.DeviceId)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("((0.))");
             entity.Property(e => e.Eealarm)
                 .HasMaxLength(255)
                 .HasColumnName("EEAlarm");

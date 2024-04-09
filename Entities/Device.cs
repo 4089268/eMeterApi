@@ -34,4 +34,6 @@ public partial class Device
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public string DeviceId { get; set; } = null!;
 }

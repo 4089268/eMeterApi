@@ -68,4 +68,6 @@ public partial class MeterDataTable
     public DateTime? RegistrationDate { get; set; }
 
     public string? GroupId { get; set; }
+
+    public string DeviceId { get; set; } = null!;
 }
