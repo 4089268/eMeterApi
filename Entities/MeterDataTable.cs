@@ -70,4 +70,43 @@ public partial class MeterDataTable
     public string? GroupId { get; set; }
 
     public string DeviceId { get; set; } = null!;
+
+    public static MeterDataTable FromMeterData( MeterData meterData){
+        var item = new MeterDataTable
+        {
+            StartCode = meterData.StartCode,
+            MeterType = meterData.MeterType,
+            MeterAddress = meterData.MeterAddress,
+            ControlCode = meterData.ControlCode,
+            DataLength = meterData.DataLenght,
+            DataId = meterData.DataId,
+            Ser = meterData.Ser,
+            CfUnit = meterData.CfUnit,
+            CummulativeFlow = meterData.CummulativeFlow,
+            CfUnitSetDay = meterData.CfUnitSetDay,
+            DayliCumulativeAmount = meterData.DayliCumulativeAmount,
+            ReverseCfUnit = meterData.ReverseCfUnit,
+            ReverseCumulativeFlow = meterData.ReverseCumulativeFlow,
+            FlowRateUnit = meterData.FlowRateUnit,
+            FlowRate = meterData.FlowRate,
+            Temperature = meterData.Temperature,
+            DevDate = meterData.DevDate,
+            DevTime = meterData.DevTime,
+            Status = meterData.Status,
+            Valve = meterData.Valve,
+            Battery = meterData.Battery,
+            Battery1 = meterData.Battery1,
+            Empty = meterData.Empty,
+            ReverseFlow = meterData.ReverseFlow,
+            OverRange = meterData.OverRange,
+            WaterTemp = meterData.WaterTemp,
+            Eealarm = meterData.EEAlarm,
+            Reserved = meterData.ReverseFlow,
+            CheckSum = meterData.CheckSume,
+            EndMark = meterData.EndMark,
+            RegistrationDate = DateTime.Now
+        };
+        return item;
+    }
+
 }

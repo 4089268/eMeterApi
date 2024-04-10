@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using eMeter.Service;
+using eMeterApi.Data;
 using eMeterApi.Models;
 using eMeterApi.Service;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +17,11 @@ namespace eMeterApi.Controllers
     {
 
         private readonly ILogger<RestController> logger;
-        private readonly EMeterRepository dbRepository;
+        private readonly EMeterRepository eMeterRepository;
 
-        public RestController( ILogger<RestController> logger, EMeterRepository repository){
+        public RestController( ILogger<RestController> logger, EMeterRepository eMeterRepository){
             this.logger = logger;
-            this.dbRepository = repository;
+            this.eMeterRepository = eMeterRepository ;
         }
         
 
@@ -43,10 +45,12 @@ namespace eMeterApi.Controllers
 
             // Process the data
             var meterData = ProcessBuffer.ProcessData( payloadRequest.DataFrame );
-
+            
             // Store in database
-            string? groupId = payloadRequest.Decoded == null ?null :payloadRequest.Decoded.GroupId;
-            dbRepository.InsertData( meterData, groupId );
+            string? groupId = payloadRequest.Decoded?.GroupId;
+            string deviceId = payloadRequest.Deveui??"";
+
+            eMeterRepository.InsertData( meterData, groupId, deviceId);
             
             // Return digest model
             return StatusCode( 201, meterData);

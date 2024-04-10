@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using eMeter.Helpers;
 using eMeter.Models;
+using eMeterApi;
 using eMeterApi.Data;
+using eMeterApi.Entities;
 using eMeterApi.Models;
 
 namespace eMeter.Service
@@ -50,6 +53,14 @@ namespace eMeter.Service
 
         }
 
+        public void AddMeasurement(MeterData meterData, string? groupId, string deviceId){
+            var data = MeterDataTable.FromMeterData( meterData);
+            data.GroupId = groupId;
+            data.DeviceId = deviceId;
+
+            eMeterContext.MeterDataTables.Add(data);
+            eMeterContext.SaveChanges();
+        }
 
     }
 }   
