@@ -26,7 +26,7 @@
                             <li class="breadcrumb-item" aria-current="page">
                                 <a asp-action="Index" asp-asp-controller="Devices" class="breadcrumb-link">Devices</a>
                             </li>
-                            <li class="breadcrumb-item active" aria-current="page">Device: @GetDetails().DeviceAddress </li>
+                            <li class="breadcrumb-item active" aria-current="page">Device: @GetDeviceInfo().MeterAddress </li>
                         </ol>
                     </nav>
                 </div>
@@ -51,33 +51,34 @@
                             <div class="user-avatar-info">
                                 <div class="m-b-20">
                                     <div class="user-avatar-name">
-                                        <h2 class="mb-1">DEV @GetDetails().DeviceAddress</h2>
+                                        <h2 class="mb-1">DEV @GetDeviceInfo().MeterAddress</h2>
                                     </div>
-                                    <div class="rating-star  d-inline-block">
-                                        <p class="d-inline-block text-dark">14</p>
+                                    <div class="rating-star d-inline-block">
+                                        <p class="d-inline-block text-dark">@GetDeviceInfo().DeviceId</p>
                                     </div>
                                 </div>
                                 <!--  <div class="float-right"><a href="#" class="user-avatar-email text-secondary">www.henrybarbara.com</a></div> -->
                                 <div class="user-avatar-address">
                                     <p class="border-bottom pb-3">
-                                        <span class="d-xl-inline-block d-block mb-2">
-                                            <i class="fa fa-calendar-alt mr-2 text-primary"></i>
-                                            <span class="m-l-0">Ultimo Actualizacion: @GetDeviceInfo().UpdatedAt.ToString("dd MMM yyyy - HH:mm:ss").ToUpper()</span>
-                                        </span>
 
                                         <span class="mb-2 ml-xl-4 d-xl-inline-block d-block">
                                             <i class="fa fa-calendar-alt mr-2 text-primary"></i>
-                                            <span class="m-l-0">Fecha Dispositivo: @GetDeviceInfo().DevDate @GetDeviceInfo().DevTime </span>
+                                            <span class="m-l-0">Fecha Registro: <span class="text-uppercase">@GetDeviceInfo().CreatedAt.ToString("dd MMM yyyy")</span></span>
+                                        </span>
+
+                                        <span class="d-xl-inline-block d-block mb-2 ml-2">
+                                            <i class="fa fa-calendar-alt mr-2 text-primary"></i>
+                                            <span class="m-l-0">Ultima Actualizacion: @GetDeviceInfo().UpdatedAt.ToString("dd MMM yyyy - HH:mm:ss").ToUpper()</span>
                                         </span>
 
                                         <span class=" mb-2 d-xl-inline-block d-block ml-xl-4">
                                             <i class="fa fa-battery-half mr-2  text-primary"></i>
-                                            <span class="m-l-0">Bateria: @GetDeviceInfo().Battery </span>
+                                            <span class="m-l-0">Bateria: <span class="text-uppercase">@GetDeviceInfo().Battery </span></span>
                                         </span>
 
                                         <span class=" mb-2 d-xl-inline-block d-block ml-xl-4">
                                             <i class="fa fa-bullseye mr-2  text-primary"></i>
-                                            <span class="m-l-0">Valvula: @GetDeviceInfo().Valve </span>
+                                            <span class="m-l-0">Valvula: <span class="text-uppercase">@GetDeviceInfo().Valve </span></span>
                                         </span>
 
                                         <span class=" mb-2 d-xl-inline-block d-block ml-xl-4">
@@ -87,8 +88,13 @@
 
                                     </p>
                                     <div class="mt-3">
-                                        <a href="#" class="mr-1 badge badge-light">Nombre projecto 1</a>
-                                        <a href="#" class="mr-1 badge badge-light">Nombre projecto 2</a>
+                                        <div class="mr-2 mt-1">
+                                            @if(!string.IsNullOrEmpty(GetDeviceInfo().GroupId)){
+                                                <a href="#" class="mr-1 px-3 badge badge-brand text-black-50"> @GetDeviceInfo().GroupId</a>
+                                            }else{
+                                                <a href="#" class="mr-1 px-3 badge badge-danger">No definido</a>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             </div>
