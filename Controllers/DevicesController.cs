@@ -15,6 +15,9 @@ using eMeterApi.Service;
 using eMeterApi.Data.Contracts;
 using Microsoft.AspNetCore.Http.Features;
 using eMeterApi.Models.ViewModels.Devices;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Update.Internal;
+using Microsoft.IdentityModel.Tokens;
 
 namespace eMeterSite.Controllers
 {
@@ -110,6 +113,26 @@ namespace eMeterSite.Controllers
             return View();
         }
         
+        [HttpPost]
+        [Route("/switch_valve")]
+        public async Task<IActionResult> SwitchValve( string deviceAddress){
+            try{
+                var device = (this.deviceService.GetDeviceInfo(deviceAddress)??throw new Exception("Device not found")).Device;
+
+                bool ok = device.Valve switch
+                {
+                    "open" => await this.deviceService.CloseValve(device.DeviceId),
+                    "close" => await this.deviceService.OpenValve(device.DeviceId),
+                    _ => throw new Exception("The valve status is unknow"),
+                };
+                return RedirectToAction("Show", new { deviceAddress = deviceAddress });
+
+            }catch(Exception err){
+                this._logger.LogError( err, "Error at trying to change the valve status of the device address {deviceAddress}", deviceAddress);
+                return BadRequest();
+            }
+        }
+
     }
 
 }   

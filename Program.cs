@@ -52,6 +52,7 @@ builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<JwtSettings>( builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<SaasSettings>( builder.Configuration.GetSection("SaasSettings"));
 builder.Services.Configure<AppSettings>( o => o.AppKey = builder.Configuration.GetValue<string>("AppKey"));
 
 // builder.Services.AddEndpointsApiExplorer();

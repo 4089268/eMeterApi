@@ -9,6 +9,10 @@ using eMeterApi.Data;
 using eMeterApi.Entities;
 using eMeterApi.Models;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Options;
+using System.Net;
+using System.Text;
 
 namespace eMeter.Service
 {
@@ -17,10 +21,12 @@ namespace eMeter.Service
 
         private readonly EMeterContext eMeterContext;
         private readonly ILogger<DeviceService> logger;
+        private readonly SaasSettings saasSettings;
 
-        public DeviceService( EMeterContext eMeterContext, ILogger<DeviceService> logger){
+        public DeviceService( EMeterContext eMeterContext, ILogger<DeviceService> logger, IOptions<SaasSettings> OptionsSaasSettings){
             this.eMeterContext = eMeterContext;
             this.logger = logger;
+            this.saasSettings = OptionsSaasSettings.Value;
         }
 
         public IEnumerable<Device> GetDevices(out int totalItems, int chunk = 25, int page = 0, IEnumerable<string>? groupsId = null, IEnumerable<string>? batteryStatus = null, IEnumerable<string>? valveStatus = null, string? search = null )
@@ -121,6 +127,53 @@ namespace eMeter.Service
             return charValues;
 
         }
+    
+        public  async Task<bool> CloseValve( string deviceId){
+            // TODO: Injet the httpclient
+
+            // Create a new instance of HttpClientHandler
+            var credentials = $"{saasSettings.User}:{saasSettings.Password}";
+            
+            // Encode the credentials string in Base64
+            var credentialsBase64 = Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
+
+
+            var request = new HttpRequestMessage( HttpMethod.Post, $"{saasSettings.Endpoint}/rest/nodes/{deviceId}/payloads/dl?port=2&confirmed=true&mode=fail_on_busy&data_format=hex");
+            var content = new StringContent("{\n\"data\":\"6810aaaaaaaaaaaaaa0404a01700997616\"\n}", null, "application/json");
+
+            request.Content = content;
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentialsBase64 );
+
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+
+            Console.WriteLine("(-) Close valve:" + response.StatusCode );
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> OpenValve( string deviceId){
+
+            // Create a new instance of HttpClientHandler
+            var credentials = $"{saasSettings.User}:{saasSettings.Password}";
+            
+            // Encode the credentials string in Base64
+            var credentialsBase64 = Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
+
+
+            var request = new HttpRequestMessage( HttpMethod.Post, $"{saasSettings.Endpoint}/rest/nodes/{deviceId}/payloads/dl?port=2&confirmed=true&mode=fail_on_busy&data_format=hex");
+            var content = new StringContent("{\n\"data\":\"6810aaaaaaaaaaaaaa0404a01700553216\"\n}", null, "application/json");
+
+            request.Content = content;
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentialsBase64 );
+
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+
+            Console.WriteLine("(-) Open valve:" + response.StatusCode );
+            return response.IsSuccessStatusCode;
+
+        }
+
     }
 
 }
