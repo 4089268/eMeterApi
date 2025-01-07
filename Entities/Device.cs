@@ -36,4 +36,9 @@ public partial class Device
     public DateTime UpdatedAt { get; set; }
 
     public string DeviceId { get; set; } = null!;
+
+    public override string ToString()
+    {
+        return $"DeviceId: {DeviceId}, MeterAddress: {MeterAddress}, CfUnit: {CfUnit}, CummulativeFlow: {CummulativeFlow}, FlowRateUnit: {FlowRateUnit}, FlowRate: {FlowRate}, Temperature: {Temperature}, DevDate: {DevDate}, DevTime: {DevTime}, Valve: {Valve}, Battery: {Battery}, ReverseFlow: {ReverseFlow}, WaterTemp: {WaterTemp}, GroupId: {GroupId}, CreatedAt: {CreatedAt}, UpdatedAt: {UpdatedAt}";
+    }
 }

@@ -114,8 +114,8 @@ namespace eMeterSite.Controllers
         }
         
         [HttpPost]
-        [Route("/switch_valve")]
-        public async Task<IActionResult> SwitchValve( string deviceAddress){
+        [Route("/switch-valve")]
+        public async Task<IActionResult> SwitchValve(string deviceAddress){
             try{
                 var device = (this.deviceService.GetDeviceInfo(deviceAddress)??throw new Exception("Device not found")).Device;
 
