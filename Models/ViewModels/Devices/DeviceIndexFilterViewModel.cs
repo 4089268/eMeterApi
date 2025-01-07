@@ -8,10 +8,10 @@ namespace eMeterApi.Models.ViewModels.Devices
 {
     public class DeviceIndexFilterViewModel
     {
-        [DisplayName("Esatus de Valvula")]
+        [DisplayName("Estatus de Valvula")]
         public string VS {get;set;} = "";
 
-        [DisplayName("Esatus de Bateria")]
+        [DisplayName("Estatus de Bateria")]
         public string BS {get;set;} = "";
 
         [DisplayName("Proyecto")]
