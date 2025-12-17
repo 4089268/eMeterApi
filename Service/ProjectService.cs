@@ -30,7 +30,7 @@ namespace eMeterApi.Service
 
         public IEnumerable<Project>? GetProjects(long? userId, string? groupId)
         {
-            var query = dbContext.SysProyectos.Where( p => p.DeletedAt ==null).AsQueryable();
+            var query = dbContext.SysProyectos.Where( p => p.DeletedAt == null).AsQueryable();
 
             if( groupId != null){
                 query = query.Where( p => p.Clave == groupId );
@@ -68,11 +68,14 @@ namespace eMeterApi.Service
             };
 
             // Save changes in db
-            try{
+            try
+            {
                 dbContext.SysProyectos.Add( newProject );
                 dbContext.SaveChanges();
                 return newProject.Id;
-            }catch( Exception err){
+            }
+            catch(Exception err)
+            {
                 logger.LogError( err, "Cant store the new project");
                 message = err.Message;
                 return null;

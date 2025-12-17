@@ -28,8 +28,9 @@ namespace eMeterSite.Controllers
             var projects = Array.Empty<Project>();
             try
             {
-                var response =  projectService.GetProjects( null, null);
-                if( response != null){
+                var response = projectService.GetProjects(null, null);
+                if( response != null)
+                {
                     projects = response.ToArray();
                 }
             }
@@ -45,32 +46,38 @@ namespace eMeterSite.Controllers
         }
         
         [Route("create")]
-        public IActionResult Create(){
+        public IActionResult Create()
+        {
             return View();
         }
 
         [Route("store")]
         [HttpPost]
-        public IActionResult Store(NewProjectViewModel newProject){
-
+        public IActionResult Store(NewProjectViewModel newProject)
+        {
             if (!ModelState.IsValid)
             {
                 return View("Create", newProject); // Pass the model back to the view
             }
 
-            try{
+            try
+            {
 
-                var project = new Project{
+                var project = new Project
+                {
                     Proyecto = newProject.Proyecto??"",
                     Clave = newProject.Clave??""
                 };
 
-                var projectId = this.projectService.CreateProject( project, out string? message );
-                if( message != null){
-                    _logger.LogWarning( message );
+                var projectId = this.projectService.CreateProject(project, out string? message);
+                if( message != null)
+                {
+                    _logger.LogWarning(message);
                 }
 
-            }catch(ValidationException){
+            }
+            catch(ValidationException)
+            {
                 ModelState.AddModelError("Clave", "La clave ya se encuentra almacenada en la base de datos");
                 return View("Create", newProject);
             }
@@ -81,7 +88,8 @@ namespace eMeterSite.Controllers
 
         [Route("{projectId}")]
         [HttpGet]
-        public IActionResult Edit( [FromRoute] int projectId ){
+        public IActionResult Edit([FromRoute] int projectId )
+        {
             
             try{
                 var projects = this.projectService.GetProjects( null, null);
@@ -112,7 +120,7 @@ namespace eMeterSite.Controllers
 
         [Route("{projectId}")]
         [HttpPost]
-        public IActionResult Update( NewProjectViewModel newProject, [FromRoute] int projectId ){
+        public IActionResult Update(NewProjectViewModel newProject, [FromRoute] int projectId ){
             
             if (!ModelState.IsValid)
             {
