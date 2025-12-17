@@ -5,23 +5,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using eMeter.Data;
 using eMeterApi.Data.Contracts;
 using eMeter.Models;
 using eMeter.Models.ViewModels.Projects;
 using eMeterApi.Data.Contracts.Models;
+using eMeterApi.Data;
 
 namespace eMeterSite.Controllers
 {
     
     [Auth]
     [Route("[controller]")]
-    public class ProjectsController(ILogger<ProjectsController> logger, IProjectService projectService) : Controller
+    public class ProjectsController(ILogger<ProjectsController> logger, IProjectService projectService, EMeterContext context ) : Controller
     {
         private readonly ILogger<ProjectsController> _logger = logger;
         private readonly IProjectService projectService = projectService;
 
+        private readonly EMeterContext eMeterContext = context;
     
         public IActionResult Index()
         {
@@ -48,7 +51,13 @@ namespace eMeterSite.Controllers
         [Route("create")]
         public IActionResult Create()
         {
-            return View();
+            var viewModel = new NewProjectViewModel();
+            viewModel.CatalogoOficinas = this.eMeterContext.CatOficinas.Where(of => of.Inactivo == false).Select(of => new SelectListItem
+            {
+                Value = of.Id.ToString(),
+                Text = of.Oficina
+            }).ToArray();
+            return View(viewModel);
         }
 
         [Route("store")]
@@ -65,8 +74,9 @@ namespace eMeterSite.Controllers
 
                 var project = new Project
                 {
-                    Proyecto = newProject.Proyecto??"",
-                    Clave = newProject.Clave??""
+                    Proyecto = newProject.Proyecto ?? "",
+                    Clave = newProject.Clave ?? "",
+                    OficinaId = newProject.OficinaId
                 };
 
                 var projectId = this.projectService.CreateProject(project, out string? message);
@@ -90,59 +100,78 @@ namespace eMeterSite.Controllers
         [HttpGet]
         public IActionResult Edit([FromRoute] int projectId )
         {
-            
-            try{
-                var projects = this.projectService.GetProjects( null, null);
-                if( projects == null){
+            try
+            {
+                var projects = this.projectService.GetProjects(null, null);
+                if(projects == null)
+                {
                     ViewData["ErrorMessage"] = "Erro al obtener el listado de projectos";
                     return View("Index", Array.Empty<Project>() );
                 }
                 
                 var project = projects!.Where( item => item.Id == projectId).FirstOrDefault();
-                if(project == null){
+                if(project == null)
+                {
                     ViewData["ErrorMessage"] = "El proyecto no se encuentra registrado o esta inactivo.";
                     return View("Index", projects );
                 }
                 
                 // Retrive the edit project to edit
-                var projectViewModel = new NewProjectViewModel{
+                var projectViewModel = new NewProjectViewModel
+                {
                     Proyecto = project.Proyecto,
-                    Clave = project.Clave
+                    Clave = project.Clave,
+                    OficinaId = project.OficinaId
                 };
-                ViewData["ProjectId"] = project.Id;
-                return View( projectViewModel );
 
-            }catch(Exception err){
+                // Obtener catalogo oficinas
+                projectViewModel.CatalogoOficinas = this.eMeterContext.CatOficinas.Where(of => of.Inactivo == false).Select(of => new SelectListItem
+                {
+                    Value = of.Id.ToString(),
+                    Text = of.Oficina
+                }).ToArray();
+
+                ViewData["ProjectId"] = project.Id;
+                return View(projectViewModel);
+            }
+            catch(Exception err)
+            {
                 ViewData["ErrorMessage"] = err.Message;
-                return View("Index", Array.Empty<Project>()  );
+                return View("Index", Array.Empty<Project>());
             }
         }
 
         [Route("{projectId}")]
         [HttpPost]
-        public IActionResult Update(NewProjectViewModel newProject, [FromRoute] int projectId ){
-            
+        public IActionResult Update(NewProjectViewModel newProject, [FromRoute] int projectId)
+        {
             if (!ModelState.IsValid)
             {
                 return View("Edit", newProject);
             }
 
-            try{
-                var project = new Project{
-                    Proyecto = newProject.Proyecto??"",
-                    Clave = newProject.Clave??""
+            try
+            {
+                var project = new Project
+                {
+                    Proyecto = newProject.Proyecto ?? "",
+                    Clave = newProject.Clave ?? "",
+                    OficinaId = newProject.OficinaId
                 };
-                this.projectService.UpdateProject( projectId, project, out string? message);
-                if( message != null){
+
+                this.projectService.UpdateProject(projectId, project, out string? message);
+                if( message != null)
+                {
                     this._logger.LogWarning( message );
                 }
-            }catch(Exception err){
+            }
+            catch(Exception err)
+            {
                 this._logger.LogError(err, "Error at udate project");
             }
 
             return RedirectToAction("Index", "Projects");
         }
-
 
     }
 }

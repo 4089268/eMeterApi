@@ -32,18 +32,22 @@ namespace eMeterApi.Service
         {
             var query = dbContext.SysProyectos.Where( p => p.DeletedAt == null).AsQueryable();
 
-            if( groupId != null){
+            if( groupId != null)
+            {
                 query = query.Where( p => p.Clave == groupId );
             }
 
-            if( userId != null){
+            if( userId != null)
+            {
                 query = query.Where( x => x.SysProyectoUsuarios.Any( u => u.IdUsuario == userId!));
             }
 
-            return query.Select( item => new Project {
+            return query.Select( item => new Project
+            {
                 Id = item.Id,
                 Proyecto = item.Proyecto??"",
-                Clave = item.Clave??""
+                Clave = item.Clave??"",
+                OficinaId = item.OficinaId
             }).ToList();
         }
 
@@ -54,7 +58,8 @@ namespace eMeterApi.Service
 
             // Validate clave is not duplicated
             var alreadyStore = dbContext.SysProyectos.Where( p => p.Clave == project.Clave).Count() > 0;
-            if( alreadyStore ){
+            if(alreadyStore)
+            {
                 var errorsMessages = new Dictionary<string,string>{
                     { "clave", "The value is already stored in the database"}
                 };
@@ -62,15 +67,17 @@ namespace eMeterApi.Service
             }
 
             // Create new entity
-            var newProject = new SysProyecto(){
+            var newProject = new SysProyecto()
+            {
                 Proyecto = project.Proyecto,
-                Clave = project.Clave
+                Clave = project.Clave,
+                OficinaId = project.OficinaId
             };
 
             // Save changes in db
             try
             {
-                dbContext.SysProyectos.Add( newProject );
+                dbContext.SysProyectos.Add(newProject);
                 dbContext.SaveChanges();
                 return newProject.Id;
             }
@@ -95,7 +102,8 @@ namespace eMeterApi.Service
 
             storedProject.DeletedAt = DateTime.Now;
 
-            try{
+            try
+            {
                 dbContext.SysProyectos.Update( storedProject );
                 dbContext.SaveChanges();
                 return true;
@@ -106,7 +114,6 @@ namespace eMeterApi.Service
             }
         }
 
-        
         public bool UpdateProject(long projectId, Project project, out string? message)
         {
             message = null;
@@ -115,30 +122,37 @@ namespace eMeterApi.Service
 
             // Validate project id exist
             var storedProject = dbContext.SysProyectos.Where( p => p.Id == projectId && p.DeletedAt == null).FirstOrDefault();
-            if( storedProject == null){
+            if( storedProject == null)
+            {
                 errorsMessages.Add("projectId", "The project was not found int the database");
             }
 
             // Validate clave is not already stored
             var claveStored = dbContext.SysProyectos.Where( p => p.DeletedAt == null && p.Id != projectId && p.Clave == project.Clave).Count() > 0;
-            if( claveStored){
+            if(claveStored)
+            {
                 errorsMessages.Add("clave", "The value is already stored in the database");
             }
 
-            if( !errorsMessages.IsNullOrEmpty()){
+            if( !errorsMessages.IsNullOrEmpty())
+            {
                 throw new SimpleValidationException("The validations fail", errorsMessages );
             }
             
             // Set new values
             storedProject!.Proyecto = project.Proyecto;
             storedProject.Clave = project.Clave;
+            storedProject.OficinaId = project.OficinaId;
 
             // Save changes
-            try{
-                dbContext.SysProyectos.Update( storedProject );
+            try
+            {
+                dbContext.SysProyectos.Update(storedProject);
                 dbContext.SaveChanges();
                 return true;
-            }catch(Exception err){
+            }
+            catch(Exception err)
+            {
                 logger.LogError( err, "Cant update the project");
                 message = err.Message;
                 return false;
@@ -179,4 +193,4 @@ namespace eMeterApi.Service
             }
         }
     }
-}       
+}
