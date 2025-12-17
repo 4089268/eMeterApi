@@ -18,5 +18,7 @@ public partial class SysProyecto : IProject
 
     public int OficinaId { get; set; }
 
+    public virtual CatOficina IdOficinaNavigation { get; set; } = null!;
+
     public virtual ICollection<SysProyectoUsuario> SysProyectoUsuarios { get; } = new List<SysProyectoUsuario>();
 }

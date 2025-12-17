@@ -16,6 +16,8 @@ public partial class EMeterContext : DbContext
     {
     }
 
+    public virtual DbSet<CatOficina> CatOficinas { get; set; }
+
     public virtual DbSet<Device> Devices { get; set; }
 
     public virtual DbSet<MeterDataTable> MeterDataTables { get; set; }
@@ -31,6 +33,22 @@ public partial class EMeterContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CatOficina>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_Rutas");
+
+            entity.ToTable("Cat_Oficinas", "Global");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Inactivo).HasDefaultValueSql("((0))");
+            entity.Property(e => e.Oficina)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("oficina");
+        });
+
         modelBuilder.Entity<Device>(entity =>
         {
             entity.HasKey(e => e.MeterAddress).HasName("pk_device_address");
@@ -119,6 +137,11 @@ public partial class EMeterContext : DbContext
                 .HasMaxLength(80)
                 .IsUnicode(false)
                 .HasColumnName("proyecto");
+
+            entity.HasOne(d => d.IdOficinaNavigation).WithMany(p => p.SysProyectos)
+                .HasForeignKey(d => d.OficinaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProyectoOficina");
         });
 
         modelBuilder.Entity<SysProyectoUsuario>(entity =>
