@@ -175,12 +175,13 @@ namespace eMeterApi.Service
 
         public IEnumerable<User>? GetUsers()
         {
-            try{
-
-                // TODO: Fix this warning
-                var usersRaw = dbContext.Usuarios
-                    .Include( item => item.SysProyectoUsuarios )
-                        .ThenInclude( proj => proj.IdProyectoNavigation ).ToList();
+            try
+            {
+                var usersRaw = this.dbContext.Usuarios
+                    .Where(u => u.DeletedAt == null)
+                    .Include(u => u.SysProyectoUsuarios!)
+                    .ThenInclude(pu => pu.IdProyectoNavigation)
+                    .ToList();
 
                 var users = new List<User>();
                 foreach(var _user in usersRaw){
@@ -202,8 +203,10 @@ namespace eMeterApi.Service
                 }
                 return users;
 
-            }catch(Exception err){
-                logger.LogError( err, "Error at get the users");
+            }
+            catch(Exception err)
+            {
+                logger.LogError(err, "Error at get the users");
                 return null;
             }
         }
@@ -214,14 +217,19 @@ namespace eMeterApi.Service
             message = null;
             
             // Find user
-            var _user = dbContext.Usuarios.Where( item => item.Id == userId && item.DeletedAt == null).FirstOrDefault();
-            if( _user == null){
+            var _user = dbContext.Usuarios
+                .Where(item => item.Id == userId && item.DeletedAt == null)
+                .FirstOrDefault();
+
+            if( _user == null)
+            {
                 throw new SimpleValidationException( "Validations fail", new Dictionary<string,string>(){
                     { "userId", "The user is not found in the database "}
                 });
             }
 
-            try{
+            try
+            {
                 _user.Name = userUpdateRequest.Name != null ?userUpdateRequest.Name :_user.Name;
                 _user.Email = userUpdateRequest.Email != null ? userUpdateRequest.Email :_user.Email;
                 _user.Company = userUpdateRequest.Company != null ? userUpdateRequest.Company! : _user.Company;
@@ -235,7 +243,9 @@ namespace eMeterApi.Service
                 dbContext.SaveChanges();
                 return true;
 
-            }catch(Exception err){
+            }
+            catch(Exception err)
+            {
                 message = "Error at upate user; " + err.Message;
                 logger.LogError(err, "Error at update user" );
                 return false;
