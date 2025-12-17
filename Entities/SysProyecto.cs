@@ -14,5 +14,9 @@ public partial class SysProyecto : IProject
 
     public DateTime? DeletedAt { get; set; }
 
+    public DateTime? FechaCreacion { get; set; }
+
+    public int OficinaId { get; set; }
+
     public virtual ICollection<SysProyectoUsuario> SysProyectoUsuarios { get; } = new List<SysProyectoUsuario>();
 }

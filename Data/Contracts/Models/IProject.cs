@@ -10,5 +10,6 @@ namespace eMeterApi.Data.Contracts.Models
         public long Id { get; set; }
         public string Proyecto { get; set; }
         public string Clave { get; set; }
+        public int OficinaId { get; set; }
     }
 }

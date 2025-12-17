@@ -24,7 +24,7 @@ public partial class Usuario : IUser
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual ICollection<SysProyectoUsuario>? SysProyectoUsuarios { get; }
+    public virtual ICollection<SysProyectoUsuario> SysProyectoUsuarios { get; } = new List<SysProyectoUsuario>();
 
     [NotMapped]
     public string Email { get => this.Usuario1??""; set => this.Usuario1 = value; }

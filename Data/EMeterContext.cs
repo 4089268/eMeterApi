@@ -45,7 +45,7 @@ public partial class EMeterContext : DbContext
             entity.Property(e => e.DevTime).HasMaxLength(255);
             entity.Property(e => e.DeviceId)
                 .HasMaxLength(255)
-                .HasDefaultValueSql("((0.))");
+                .HasDefaultValueSql("('00000000')");
             entity.Property(e => e.FlowRateUnit).HasMaxLength(255);
             entity.Property(e => e.GroupId).IsUnicode(false);
             entity.Property(e => e.ReverseFlow).HasMaxLength(255);
@@ -59,6 +59,8 @@ public partial class EMeterContext : DbContext
             entity
                 .HasNoKey()
                 .ToTable("MeterDataTable", tb => tb.HasTrigger("MeterDataTableInsert"));
+
+            entity.HasIndex(e => new { e.MeterAddress, e.RegistrationDate }, "indice1").IsDescending(false, true);
 
             entity.Property(e => e.Battery).HasMaxLength(255);
             entity.Property(e => e.Battery1).HasMaxLength(255);
@@ -107,6 +109,12 @@ public partial class EMeterContext : DbContext
             entity.Property(e => e.DeletedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("deleted_at");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnName("fecha_creacion");
+            entity.Property(e => e.OficinaId)
+                .HasDefaultValueSql("((1))")
+                .HasColumnName("id_oficina");
             entity.Property(e => e.Proyecto)
                 .HasMaxLength(80)
                 .IsUnicode(false)

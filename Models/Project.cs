@@ -17,5 +17,8 @@ namespace eMeter.Models
 
         [JsonPropertyName("clave")]
         public string Clave { get; set; } = "";
+
+        [JsonPropertyName("oficinaId")]
+        public int OficinaId { get; set; } = 0;
     }
 }
