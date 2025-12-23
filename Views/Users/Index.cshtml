@@ -66,20 +66,23 @@
                                             <td>@user.Name</td>
                                             <td>@user.Company</td>
                                             <td>
-                                                <div class="d-flex">
-                                                @if(user.Projects != null){
-                                                    foreach( var project in user.Projects){
+                                                <div>
+                                                @if(user.Projects != null)
+                                                {
+                                                    foreach( var project in user.Projects)
+                                                    {
                                                         <span class="badge badge-info mx-1">@project.Proyecto</span>
                                                     }
-                                                }else{
+                                                }
+                                                else
+                                                {
                                                     <span class="text-black-50">Sin proyectos</span>
                                                 }
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="d-grid gap-2 d-md-block">
-                                                    <a asp-controller="Users" asp-action="Edit" asp-route-userId="@user.Id"
-                                                      class="btn btn-primary rounded py-1">Editar</a>
+                                                    <a asp-controller="Users" asp-action="Edit" asp-route-userId="@user.Id" class="btn btn-primary rounded py-1">Editar</a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -93,7 +96,6 @@
                 </div>
             </div>
         </div>
-       
     </div>
 </div>
 

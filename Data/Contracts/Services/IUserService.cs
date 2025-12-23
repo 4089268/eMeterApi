@@ -10,7 +10,6 @@ namespace eMeterApi.Data.Contracts
 {
     public interface IUserService
     {
-        
         public string? Authenticate(IUserCredentials userCredentials, out string? message );
 
         public IEnumerable<User>? GetUsers();
@@ -19,7 +18,7 @@ namespace eMeterApi.Data.Contracts
 
         public bool DisableUser( long userId, out string? message);
 
-        public bool UpdateUser( long userId, UserUpdateRequest userUpdateRequest, out string? message );
+        public bool UpdateUser( long userId, UserEditRequest userUpdateRequest, out string? message );
 
     }
 }

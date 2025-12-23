@@ -63,101 +63,102 @@ namespace eMeterSite.Controllers
 
         [Route("/")]
         [HttpPost]
-        public IActionResult Store( UserRequest userRequest ){
-
+        public IActionResult Store(UserRequest userRequest)
+        {
             if (!ModelState.IsValid)
             {
-                // Get list of projects availables and make a multi select list
-                var _projects = this.projectService.GetProjects(null, null)??[];
-                var projectsListItems =  _projects.Select( item => new KeyValuePair<string, long>(
-                    $"{item.Proyecto} ({item.Clave})",  item.Id
-                )).ToList();
-                ViewData["ProjectsAvailable"] = projectsListItems;
-
+                ViewData["ProjectsAvailable"] = GetProjectsListItems();
                 return View("Create", userRequest );
             }
 
             // Store the user
-            try{
+            try
+            {
                 var userId = this.userService.CreateUser( userRequest, null, out string? message );
-                if( userId == null){
-                    // TODO: Handle error
-                    Console.WriteLine("(-) Error message:" + message);
+                if( userId == null)
+                {
+                    this._logger.LogError("Error no controlado al crear el usuario: {message}", message);
                 }
-                
-
-            }catch(SimpleValidationException ex){
-                
-                foreach( var errorProperty in ex.ValidationErrors){
-                    ModelState.AddModelError( errorProperty.Key, errorProperty.Value);
+            }
+            catch(SimpleValidationException ex)
+            {
+                foreach(var errorProperty in ex.ValidationErrors)
+                {
+                    ModelState.AddModelError(errorProperty.Key, errorProperty.Value);
                 }
-
-                // Get list of projects availables and make a multi select list
-                var _projects = this.projectService.GetProjects(null, null)??[];
-                var projectsListItems =  _projects.Select( item => new KeyValuePair<string, long>(
-                    $"{item.Proyecto} ({item.Clave})",  item.Id
-                )).ToList();
-                ViewData["ProjectsAvailable"] = projectsListItems;
-
+                ViewData["ProjectsAvailable"] = GetProjectsListItems();
                 return View("Create", userRequest);
             }
 
             return RedirectToAction("Index", "Users");
-
         }
 
         [Route("{userId}")]
         [HttpGet]
-        public IActionResult Edit( [FromRoute] int userId ){
-            try{
-                 // Get list of projects availables and make a multi select list
-                var _projects = this.projectService.GetProjects(null, null)??[];
-                var projectsListItems =  _projects.Select( item => new KeyValuePair<string, long>(
-                    $"{item.Proyecto} ({item.Clave})",  item.Id
-                )).ToList();
-                
+        public IActionResult Edit([FromRoute] int userId)
+        {
+            try
+            {
                 // TODO: Make method to search user by id
-                var user = this.userService.GetUsers()!.Where(item => item.Id ==  userId).FirstOrDefault();
-                if(user == null){
+                var user = this.userService.GetUsers()!.Where(item => item.Id == userId).FirstOrDefault();
+                if(user == null)
+                {
                     ViewData["ErrorMessage"] = "Erro al obtener los datos del usuario";
                     return View("Index", Array.Empty<Project>() );
                 }
                 
                 // Retrive the edit project to edit
-                var userRequest = new UserRequest{
+                var userRequest = new UserEditRequest
+                {
+                    UserId = user.Id,
                     Email = user.Email,
                     Name = user.Name,
                     Company = user.Company,
                     ProjectsId= (user.Projects??[]).Select( item => item.Id).ToList()
                 };
 
-                ViewData["ProjectsAvailable"] = projectsListItems;
+                ViewData["ProjectsAvailable"] = GetProjectsListItems();
 
-                return View( userRequest );
-
-            }catch(Exception err){
+                return View(userRequest);
+            }
+            catch(Exception err)
+            {
                 ViewData["ErrorMessage"] = err.Message;
-                return View("Index", Array.Empty<Project>()  );
+                return View("Index", Array.Empty<Project>());
             }
         }
 
-        // [Route("{projectId}")]
-        // [HttpPost]
-        // public async Task<IActionResult> Update( NewProjectViewModel newProject, [FromRoute] int projectId ){
-            
-        //     if (!ModelState.IsValid)
-        //     {
-        //         return View("Edit", newProject);
-        //     }
+        
+        [Route("{userId}")]
+        [HttpPost]
+        public async Task<IActionResult> Update(UserEditRequest request, [FromRoute] int userId)
+        {
+            Console.WriteLine( string.Format("Total proyectos {0}", request.ProjectsId.Count()));
 
-        //     try{
-        //         await this.projectService.UpdateProject( projectId, newProject);
-        //     }catch(Exception err){
-        //         this._logger.LogError(err, "Error at udate project");
-        //     }
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("[ERR]: ALGO OCURRIO");
+                ViewData["ProjectsAvailable"] = GetProjectsListItems();
+                return View("Edit", request);
+            }
 
-        //     return RedirectToAction("Index", "Projects");
-        // }
+            var ok = this.userService.UpdateUser(userId, request, out string? message);
+            if(!ok)
+            {
+                throw new Exception(message);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        private IEnumerable<KeyValuePair<string, long>> GetProjectsListItems()
+        {
+            var _projects = this.projectService.GetProjects(null, null)??[];
+            var projectsListItems = _projects.Select( item => new KeyValuePair<string, long>(
+                $"{item.Proyecto} ({item.Clave})", item.Id
+            )).ToList();
+            return projectsListItems;
+        }
 
 
     }

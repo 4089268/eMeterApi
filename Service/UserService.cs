@@ -16,6 +16,7 @@ using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System.Collections.ObjectModel;
+using System.Reflection.Metadata;
 
 namespace eMeterApi.Service
 {
@@ -92,16 +93,18 @@ namespace eMeterApi.Service
 
             // Validate if user is already store
             var _user = dbContext.Usuarios.Where( usuario => usuario.Usuario1 == user.Email && usuario.DeletedAt == null ).FirstOrDefault();
-            if( _user != null ){
+            if( _user != null)
+            {
                 throw new SimpleValidationException("Validations fail", new Dictionary<string,string>(){
                     { "email", "El correo electrónico ya se encuentra registrado en la base de datos"}
                 });
             }
 
-            var hashedPassword = DataHasher.HashDataWithKey( user.Password!, appKeySettings.AppKey );
+            var hashedPassword = DataHasher.HashDataWithKey(user.Password!, appKeySettings.AppKey);
 
             // Create user entity
-            var newUser = new Entities.Usuario(){
+            var newUser = new Entities.Usuario()
+            {
                 Usuario1 = user.Email!,
                 Operador = user.Name,
                 Password =  hashedPassword,
@@ -110,12 +113,15 @@ namespace eMeterApi.Service
 
             // Store the new entity
             long userId = 0;
-            try{
-                dbContext.Usuarios.Add( newUser );
+            try
+            {
+                dbContext.Usuarios.Add(newUser);
                 dbContext.SaveChanges();
-                userId =  newUser.Id;
+                userId = newUser.Id;
 
-            }catch(Exception err){
+            }
+            catch(Exception err)
+            {
                 logger.LogError(err, "Error at stored new user at UserService.CreateUser");
                 message = "Fail to create new user; " + err.Message;
                 return null;
@@ -125,8 +131,10 @@ namespace eMeterApi.Service
             try
             {
                 var projects = dbContext.SysProyectos.Where( item => user.ProjectsId.Contains( item.Id ) ).ToImmutableArray();
-                foreach( var project in projects ){
-                    dbContext.SysProyectoUsuarios.Add( new SysProyectoUsuario {
+                foreach( var project in projects)
+                {
+                    dbContext.SysProyectoUsuarios.Add( new SysProyectoUsuario
+                    {
                         IdUsuario = userId,
                         IdProyecto = project.Id
                     });
@@ -211,9 +219,8 @@ namespace eMeterApi.Service
             }
         }
 
-        public bool UpdateUser(long userId, UserUpdateRequest userUpdateRequest, out string? message)
+        public bool UpdateUser(long userId, UserEditRequest userUpdateRequest, out string? message)
         {
-
             message = null;
             
             // Find user
@@ -223,7 +230,8 @@ namespace eMeterApi.Service
 
             if( _user == null)
             {
-                throw new SimpleValidationException( "Validations fail", new Dictionary<string,string>(){
+                throw new SimpleValidationException( "Validations fail", new Dictionary<string,string>()
+                {
                     { "userId", "The user is not found in the database "}
                 });
             }
@@ -233,16 +241,40 @@ namespace eMeterApi.Service
                 _user.Name = userUpdateRequest.Name != null ?userUpdateRequest.Name :_user.Name;
                 _user.Email = userUpdateRequest.Email != null ? userUpdateRequest.Email :_user.Email;
                 _user.Company = userUpdateRequest.Company != null ? userUpdateRequest.Company! : _user.Company;
-                if( userUpdateRequest.Password != null){
+
+                if(!string.IsNullOrEmpty(userUpdateRequest.Password))
+                {
                     var hashedPassword = DataHasher.HashDataWithKey(userUpdateRequest.Password, appKeySettings.AppKey);
                     _user.Password = hashedPassword;
                 }
 
                 // Update database
-                dbContext.Update( _user );
+                dbContext.Update(_user);
                 dbContext.SaveChanges();
-                return true;
+                this.logger.LogInformation("Usuario '{userId}:{userName}' actualizado con exito", userId, _user.Name);
 
+                // Attach the projects ids
+                try
+                {
+                    var c = dbContext.SysProyectoUsuarios.Where(e => e.IdUsuario == userId).ExecuteDelete();
+
+                    var projects = dbContext.SysProyectos.Where(item => userUpdateRequest.ProjectsId.Contains(item.Id)).ToImmutableArray();
+                    foreach(var project in projects)
+                    {
+                        dbContext.SysProyectoUsuarios.Add(new SysProyectoUsuario
+                        {
+                            IdUsuario = userId,
+                            IdProyecto = project.Id
+                        });
+                    }
+                    dbContext.SaveChanges();
+                }
+                catch (System.Exception ex)
+                {
+                    this.logger.LogError("Can't attach the proyects to the user at UserService. CreateUser; {message}", ex.Message);
+                }
+
+                return true;
             }
             catch(Exception err)
             {

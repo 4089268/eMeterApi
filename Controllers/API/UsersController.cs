@@ -113,7 +113,7 @@ namespace eMeterApi.API.Controllers
 
         [HttpPatch]
         [Route("{userId}")]
-        public IActionResult UpdateUser( [FromRoute] long userId, [FromBody] UserUpdateRequest userRequest )
+        public IActionResult UpdateUser( [FromRoute] long userId, [FromBody] UserEditRequest userRequest)
         {
             
             if( !ModelState.IsValid ){

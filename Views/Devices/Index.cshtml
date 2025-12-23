@@ -55,35 +55,38 @@
                 </ul>
             </nav>
         </div>
-    </div>  
-    <!-- End Paginator Top  -->
+    </div>a
+    <!-- End Paginator Top -->
     
 
     <!-- Details -->
     <div class="row">
 
         <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12 col-12">
-            @if(@Model.Devices.Count() > 0){
+            @if(@Model.Devices.Count() > 0)
+            {
                 foreach (Device device in @Model.Devices)
                 {
-                    @Html.Partial("./Partials/Card", device )
+                    <partial name="./Partials/Card" model="device" />
                 }
-            }else{
+            }
+            else
+            {
                 <div class="alert alert-primary" role="alert">
                     <h4 class="alert-heading">No hay datos disponibles</h4>
-                    <p>No hay registros de los medidores asignados a este usuario o no tiene asignado ningún medidor, espere o contacte con el administrador.</p>
+                    <p>No hay registros de los medidores asignados a este usuario o no tiene ningun proyecto asignado, espere o contacte con el administrador.</p>
                 </div>
             }
         </div>
 
         
         <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12 col-12">
-            @Html.Partial("./Partials/DeviceSidebar", @Model.Filter )
+            <partial name="./Partials/DeviceSidebar" model="Model.Filter" />
         </div>
     </div>
     <!-- End Details -->
 
-    <!-- Paginator End  -->
+    <!-- Paginator End -->
     <div class="row">
         <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12 col-12">
 
@@ -111,7 +114,7 @@
                 </ul>
             </nav>
         </div>
-    </div>  
-    <!-- End Paginator End  -->
+    </div>
+    <!-- End Paginator End -->
     
 </div>
