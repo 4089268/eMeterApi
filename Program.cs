@@ -25,7 +25,7 @@ builder.Services.AddAuthentication( o => {
         ValidIssuer = builder.Configuration.GetValue<string>("JwtSettings:Issuer"),
         ValidAudience = builder.Configuration.GetValue<string>("JwtSettings:Audience"),
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes( builder.Configuration.GetValue<string>("JwtSettings:Key") )
+            Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("JwtSettings:Key")!)
         ),
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -53,7 +53,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<JwtSettings>( builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<SaasSettings>( builder.Configuration.GetSection("SaasSettings"));
-builder.Services.Configure<AppSettings>( o => o.AppKey = builder.Configuration.GetValue<string>("AppKey"));
+builder.Services.Configure<AppSettings>( o => o.AppKey = builder.Configuration.GetValue<string>("AppKey")!);
 
 // builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen( options => 
@@ -98,11 +98,11 @@ app.UseHttpLogging();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+ 
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseRouting();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"

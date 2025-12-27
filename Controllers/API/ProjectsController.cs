@@ -4,12 +4,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Mvc;
 using eMeter.Models;
 using eMeterApi.Data.Contracts;
 using eMeterApi.Data.Exceptions;
 using eMeterApi.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using eMeterApi.Models;
+using eMeter.Service;
 
 namespace eMeterApi.API.Controllers
 {
@@ -18,144 +21,80 @@ namespace eMeterApi.API.Controllers
     [Route("api/[controller]")]
     public class ProjectsController : ControllerBase
     {
-
+        private readonly ILogger<ProjectsController> logger;
         private readonly IProjectService projectService;
+        private readonly DeviceService deviceService;
 
-        public ProjectsController(IProjectService projectService)
+        public ProjectsController(ILogger<ProjectsController> logger, IProjectService projectService, DeviceService deviceServ)
         {
+            this.logger = logger;
             this.projectService = projectService;
+            this.deviceService = deviceServ;
         }
 
         [HttpGet]
         [ProducesResponseType(200)]
-        public IActionResult GetProjects()
+        [ProducesResponseType(409)]
+        public ActionResult<BasicResponse<IEnumerable<ProjectResponse>>> GetProjects()
         {
-            var _data = this.projectService.GetProjects(null, null);
-            if(_data == null){
-                return Ok( Array.Empty<SysProyecto>() );
-            }
-
-            var results = new List<dynamic>();
-            foreach( var item in _data){
-                results.Add( new {
-                    Id = item.Id,
-                    Proyecto = item.Proyecto,
-                    Clave = item.Clave
-                });
-            }
-
-            return Ok(results);
-        }
-
-
-        /// <summary>
-        /// Store a new entity of SysProyecto at the database
-        /// </summary>
-        /// <param name="proyecto"></param>
-        /// <returns>A entity created</returns>
-        /// <response code="201">Returns the newly created item</response>
-        /// <response code="400">The request is not valid</response>
-        /// <response code="422">Cant store the entity on the database</response>
-        [HttpPost]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
-        [Produces("application/json")]
-        public IActionResult StoreProject( [FromBody] SysProyecto proyecto)
-        {
-            if(!ModelState.IsValid){
-                return BadRequest( ModelState );
-            }
-
+            var projectsResponse = new List<ProjectResponse>();
             try
             {
-                var project = new Project{
-                    Clave = proyecto.Clave??"",
-                    Proyecto = proyecto.Proyecto??""
-                };
-                var _newSysProyecto = this.projectService.CreateProject( project, out string? message);
-                return StatusCode( 201, new {id = _newSysProyecto } );
+                // Retrive the projects
+                IEnumerable<Project> projects = this.projectService.GetProjects(null, null) ?? Array.Empty<Project>();
+
+                // Retrive the devices
+                List<Device> devices = this.deviceService.GetDevices(out int _totalDevices, chunk: 0).ToList(); // Retrive all
+
+                foreach(var p in projects)
+                {
+                    var _devices = devices.Where(d => d.GroupId == p.Clave).ToList();
+                    devices.RemoveAll(d => d.GroupId == p.Clave);
+
+                    var _projResponse = new ProjectResponse
+                    {
+                        Id = p.Id,
+                        Proyecto = p.Proyecto,
+                        Clave = p.Clave,
+                        OficinaId = p.OficinaId,
+                        OficinaDesc = p.OficinaDesc,
+                        Devices = _devices,
+                        TotalDevices = _devices.Count()
+                    };
+                    projectsResponse.Add(_projResponse);
+                }
+
+                if(devices.Any())
+                {
+                    var _projResponse = new ProjectResponse
+                    {
+                        Id = 0,
+                        Proyecto = "-- SIN PROYECTO --",
+                        Clave = "",
+                        OficinaId = 0,
+                        OficinaDesc = "",
+                        Devices = devices,
+                        TotalDevices = devices.Count()
+                    };
+                    projectsResponse.Add(_projResponse);
+                }
+
+                return Ok(new BasicResponse<IEnumerable<ProjectResponse>>
+                {
+                    Title = "Proyectos obtenidos",
+                    Value = projectsResponse
+                });
             }
-            catch (Exception err)
+            catch (System.Exception ex)
             {
-                return UnprocessableEntity( new { message = $"Cant store the entity; {err.Message}"} );
-            }
-            
-        }
-        
-        [HttpDelete]
-        [Route ("{projectId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
-        public IActionResult DeleteProject( [FromRoute] long projectId )
-        {
-            try{
-                this.projectService.DeletedProject(projectId, out string? message);
-                return Ok( new {
-                    message = $"Project id {projectId} deleted"
-                });
-            }catch(EntityNotFoundException eNotFound){
-                return BadRequest( new {
-                    message = eNotFound.Message
-                });
-            }catch(Microsoft.EntityFrameworkCore.DbUpdateException dbException ){
-                return UnprocessableEntity( new {
-                    message = dbException.Message
+                logger.LogError(ex, "Error al obtener los proyectos registrados.");
+                return Conflict(new BasicResponse<IEnumerable<ProjectResponse>>
+                {
+                    Title = "Error al obtener los datos",
+                    Message = ex.Message
                 });
             }
         }
-
-        [HttpPatch]
-        [Route ("{projectId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
-        public IActionResult UpdateProject( [FromRoute] long projectId, [FromBody] SysProyecto sysProyecto )
-        {
-            try{
-                 var project = new Project{
-                    Clave = sysProyecto.Clave??"",
-                    Proyecto = sysProyecto.Proyecto??""
-                };
-                this.projectService.UpdateProject(projectId, project, out string? message);
-                return Ok( new {
-                    message = $"Project id {projectId} updated"
-                });
-            }catch(EntityNotFoundException eNotFound){
-                return BadRequest( new {
-                    message = eNotFound.Message
-                });
-            }catch(Microsoft.EntityFrameworkCore.DbUpdateException dbException ){
-                return UnprocessableEntity( new {
-                    message = dbException.Message
-                });
-            }
-        }
-
-
-        [HttpPost]
-        [Route ("/user/{userId}")]
-        public IActionResult AssignProyectUsers( [FromQuery] long userId, [FromBody] IEnumerable<long> projects )
-        {
-            throw new NotImplementedException();
-
-            // if(!ModelState.IsValid){
-            //     return BadRequest( ModelState );
-            // }
-
-            // try
-            // {
-            //     var _newSysProyecto = this.projectService.CreateProject(proyecto, out string? message);
-            //     return StatusCode( 201, new {id = _newSysProyecto } );
-            // }
-            // catch (Exception err)
-            // {
-            //     return UnprocessableEntity( new { message = $"Cant store the entity; {err.Message}"} );
-            // }
-            
-        }
-        
 
     }
 }

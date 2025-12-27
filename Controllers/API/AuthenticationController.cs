@@ -15,13 +15,11 @@ namespace eMeterApi.Controllers.API
     [Route("api/[controller]")]
     public class AuthenticationController : ControllerBase
     {
-
         private readonly IUserService userService;
 
         public AuthenticationController( IUserService userService){
             this.userService = userService;
-        } 
-
+        }
 
         /// <summary>
         /// 
@@ -33,20 +31,23 @@ namespace eMeterApi.Controllers.API
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
-        public IActionResult Authenticated( [FromBody] AuthenticationRequest authenticationRequest )
+        public IActionResult Authenticated([FromBody] AuthenticationRequest authenticationRequest)
         {
-            if(!ModelState.IsValid){
+            if(!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
             }
 
             var token = userService.Authenticate( authenticationRequest, out string? message );
-            if( token == null){
-                return Unauthorized( new {
+            if( token == null)
+            {
+                return Unauthorized(new {
                     message = message
                 });
             }
 
-            return Ok( new {
+            return Ok(new
+            {
                 title = "Token generated",
                 token
             });

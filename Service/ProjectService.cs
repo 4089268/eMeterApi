@@ -21,16 +21,18 @@ namespace eMeterApi.Service
         private readonly EMeterContext dbContext;
         private readonly ILogger<ProjectService> logger;
 
-        public ProjectService( EMeterContext dbContext, ILogger<ProjectService> logger )
+        public ProjectService(EMeterContext dbContext, ILogger<ProjectService> logger)
         {
             this.dbContext = dbContext;
             this.logger = logger;
         }
 
-
         public IEnumerable<Project>? GetProjects(long? userId, string? groupId)
         {
-            var query = dbContext.SysProyectos.Where( p => p.DeletedAt == null).AsQueryable();
+            var query = dbContext.SysProyectos
+                .Where(p => p.DeletedAt == null)
+                .Include(p => p.IdOficinaNavigation)
+                .AsQueryable();
 
             if( groupId != null)
             {
@@ -45,9 +47,10 @@ namespace eMeterApi.Service
             return query.Select( item => new Project
             {
                 Id = item.Id,
-                Proyecto = item.Proyecto??"",
-                Clave = item.Clave??"",
-                OficinaId = item.OficinaId
+                Proyecto = item.Proyecto ?? string.Empty,
+                Clave = item.Clave ?? string.Empty,
+                OficinaId = item.OficinaId,
+                OficinaDesc = item.IdOficinaNavigation.Oficina ?? string.Empty
             }).ToList();
         }
 
@@ -93,7 +96,7 @@ namespace eMeterApi.Service
         {
             message = null;
 
-            // Validate 
+            // Validate
             var storedProject = dbContext.SysProyectos.Where( p => p.Id == projectId && p.DeletedAt == null).FirstOrDefault();
             if( storedProject == null){
                 var errorsMessages = new Dictionary<string,string>{{"projectId", "The project was not found int the database"}};
@@ -192,5 +195,6 @@ namespace eMeterApi.Service
                 return false;
             }
         }
+    
     }
 }

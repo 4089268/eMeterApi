@@ -20,5 +20,8 @@ namespace eMeter.Models
 
         [JsonPropertyName("oficinaId")]
         public int OficinaId { get; set; } = 0;
+
+        [JsonPropertyName("oficinaDesc")]
+        public string OficinaDesc { get; set; } = string.Empty;
     }
 }
